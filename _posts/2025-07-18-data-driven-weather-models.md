@@ -30,12 +30,12 @@ One of the main strengths of machine learning models is their ability to capture
 
 However, machine learning models require large amounts of data to be effective. Their performance often degrades in data-sparse regions or for rare and extreme events. In particular, studies have shown that ML models often underestimate the intensity of cyclones and other high-impact phenomena. The below figure from [Shi et al.](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2024JH000481) demonstrates this by showing the relative error of maximum wind speeds for a well known data-driven model, PanguWeather (PANGU-ECMWF, PANGU-NCEP, PANGU-ERA5; the same model with different initial conditions). It can be seen that compared to the other NWP models, PanguWeather has greater error (closer to zero is better), and greater dispersion.
 
-<img src="/assets/post1_fig3.jpg" alt="description" class="center-image" width="500" height="400">
+<img src="/assets/post1_fig3.jpg" alt="Pangu Errors" class="center-image" width="500" height="400">
 
 Physical interpretability is another challenge. Unlike physics-based models, where each variable and equation has a clear meaning, neural networks are often black boxes. And while some studies suggest that these models learn physically meaningful structures, it’s also been shown their internal representations of physical systems may be lacking. For example, the ML model studied by [Baño-Medina et al.](https://www.nature.com/articles/s41612-025-00949-6) was shown to exhibit unexplained sensitivities to certain perturbations. In the below image, the figure on the right are the sensitivities from a NWP model and the figure on the left are the sensitivities from a data-driven model. The similarities near the bottom between the two are relatively good, supporting the notion that physical dynamics have been learnt. However, at the top of the left figure, sensitivities are observed not seen in the NWP one. There are also no known dynamics to explain this, suggesting that the ML model responded to perturbations that had no clear physical cause.
 
 
-<img src="/assets/post1_fig4.jpg" alt="Unexplained sensitivities" width="500" height="800" class="center-image">
+<img src="/assets/post1_fig4.jpg" alt="Unexplained sensitivities" width="700" height="400" class="center-image">
 
 
 Other studies have noted that ML models tend to smooth out sharp gradients, reducing their practical resolution. In the study by [Bonavita](https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2023GL107377), it was noted that the "effective resolution" of the data-driven model is lower than the resolution of their input data. For instance, a model trained on ERA5 data at 0.25° resolution (~25 km) may produce outputs that are effectively closer to 1° (~100 km) or even coarser. Think of it like watching a 4K video that’s been blurred. While the file is high-res, the model 'sees' it more fuzzily.
