@@ -48,3 +48,9 @@ hr {
   display: block;
   margin: 0 auto;
 }
+
+figcaption {
+    font-size: 12px;
+    text-align: center;
+    font-style: italic;
+}
