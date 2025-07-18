@@ -5,8 +5,8 @@ For decades, weather forecasting has relied on physical simulations run on power
 A similar approach exists in climate science. In the Coupled Model Intercomparison Project Phase 6 (CMIP6), hundreds of climate models from research institutions worldwide generate projections over the coming century. These models simulate the Earth system by solving coupled physical equations for atmosphere, ocean, sea ice, and land, across millions of grid cells and time steps.
 
 <br><br>
-<figure>
-  <img src="/assets/post1_fig1.gif" alt="European Heatwave" width="600" height="360" class="center-image">
+<figure class="center-image">
+  <img src="/assets/post1_fig1.gif" alt="European Heatwave" width="600" height="360">
   <figcaption>European Heatwave July 2025 from ERA5 reanalysis data (1000hPa temperature)</figcaption>
 </figure>
 <br><br>
@@ -32,8 +32,8 @@ For this reason, there is no guarantee that our data-driven models will respect 
 One of the main strengths of machine learning models is their ability to capture complex, nonlinear relationships (something the Earth system is full of). This is why they have shown great promise, especially in medium-range forecasting (3–10 days), where traditional models begin to lose accuracy. Machine learning weather models wouldn’t be getting so much attention if their performance wasn’t competitive with NWPs. Various models have shown superior or comparative performance in terms of metrics such as RMSE and ACC when compared to NWP models. The image below from [Rackow et al.](https://arxiv.org/abs/2409.18529) shows performance in terms of RMSE (the lower the better) at different lead times for three ML models against an NWP (IFS). 
 
 <br><br>
-<figure>
-  <img src="/assets/post1_fig2.png" alt="ML Models RMSE" class="center-image" width="500" height="400">
+<figure class="center-image">
+  <img src="/assets/post1_fig2.png" alt="ML Models RMSE" width="500" height="400">
   <figcaption>RMSE for ML and NWP models at multiple lead times</figcaption>
 </figure>
 
@@ -42,8 +42,8 @@ One of the main strengths of machine learning models is their ability to capture
 However, machine learning models require large amounts of data to be effective. Their performance often degrades in data-sparse regions or for rare and extreme events. In particular, studies have shown that ML models often underestimate the intensity of cyclones and other high-impact phenomena. The below figure from [Shi et al.](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2024JH000481) demonstrates this by showing the relative error of maximum wind speeds for a well known data-driven model, PanguWeather (PANGU-ECMWF, PANGU-NCEP, PANGU-ERA5; the same model with different initial conditions). It can be seen that compared to the other NWP models, PanguWeather has greater error (closer to zero is better), and greater dispersion.
 
 <br><br>
-<figure>
-  <img src="/assets/post1_fig3.jpg" alt="Pangu Errors" class="center-image" width="500" height="400">
+<figure class="center-image">
+  <img src="/assets/post1_fig3.jpg" alt="Pangu Errors" width="500" height="400">
   <figcaption>Pangu-Weather intensity errors compared to NWP models</figcaption>
 </figure>
 <br><br>
@@ -52,8 +52,8 @@ Physical interpretability is another challenge. Unlike physics-based models, whe
 
 <br><br>
 
-<figure>
-  <img src="/assets/post1_fig4.jpg" alt="Unexplained sensitivities" width="700" height="400" class="center-image">
+<figure class="center-image">
+  <img src="/assets/post1_fig4.jpg" alt="Unexplained sensitivities" width="700" height="400">
   <figcaption>Perturbation sensitivities for an NWP model (left) and an ML model (right)</figcaption>
 </figure>
 <br><br>
