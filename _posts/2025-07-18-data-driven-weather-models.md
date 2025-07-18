@@ -27,12 +27,12 @@ For this reason, there is no guarantee that our data-driven models will respect 
 One of the main strengths of machine learning models is their ability to capture complex, nonlinear relationships (something the Earth system is full of). This is why they have shown great promise, especially in medium-range forecasting (3–10 days), where traditional models begin to lose accuracy. Machine learning weather models wouldn’t be getting so much attention if their performance wasn’t competitive with NWPs. Various models have shown superior or comparative performance in terms of metrics such as RMSE and ACC when compared to NWP models. The image below shows performance in terms of RMSE (the lower the better) at different lead times for three ML models against an NWP (IFS). 
 
 
-![Error](/assets/post1_fig2.jpg "ML Models RMSE"){: .center-image }
+![Error](/assets/post1_fig2.png "ML Models RMSE"){: .center-image }
 
 
 However, machine learning models require large amounts of data to be effective. Their performance often degrades in data-sparse regions or for rare and extreme events. In particular, studies have shown that ML models often underestimate the intensity of cyclones and other high-impact phenomena. The below figure from [reference] demonstrates this by showing the relative error of maximum wind speeds for a well known data-driven model, PanguWeather (PANGU-ECMWF, PANGU-NCEP, PANGU-ERA5; the same model with different initial conditions). It can be seen that compared to the other NWP models, PanguWeather has greater error (closer to zero is better), and greater dispersion.
 
-<img src="/assets/post1_fig3.jpg" alt="PanguWeather Errors" width="500" height="300" style="display: block; margin-left: auto; margin-right: auto;">
+<img src="/assets/post1_fig3.jpg" alt="description" style="display: block; margin: 0 auto;" width="500" height="800">
 
 Physical interpretability is another challenge. Unlike physics-based models, where each variable and equation has a clear meaning, neural networks are often black boxes. And while some studies suggest that these models learn physically meaningful structures, it’s also been shown their internal representations of physical systems may be lacking. For example, the ML model studied by [reference] was shown to exhibit unexplained sensitivities to certain perturbations. In the below image, the figure at the top are the sensitivities from a NWP model and the figure at the bottom are the sensitivities from a data-driven model. The similarities at the bottom are relatively good, supporting the notion that physical dynamics have been learnt. However, at the top of the bottom figure, sensitivities are observed not seen in the NWP one. There are also no known dynamics to explain this, suggesting that the ML model responded strongly to perturbations that had no clear physical cause.
 
