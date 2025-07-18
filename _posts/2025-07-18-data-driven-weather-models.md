@@ -4,14 +4,12 @@ For decades, weather forecasting has relied on physical simulations run on power
 
 A similar approach exists in climate science. In the Coupled Model Intercomparison Project Phase 6 (CMIP6), hundreds of climate models from research institutions worldwide generate projections over the coming century. These models simulate the Earth system by solving coupled physical equations for atmosphere, ocean, sea ice, and land, across millions of grid cells and time steps.
 
-<br><br>
+<br>
 
 <figure>
-  <img src="/assets/post1_fig1.gif" alt="European Heatwave" width="500" height="400" class="center-image">
+  <img src="/assets/post1_fig1.gif" alt="European Heatwave" width="800" height="500" class="center-image">
   <figcaption>RMSE for ML and NWP models at multiple lead times</figcaption>
 </figure>
-
-<br><br>
 
 In recent years, data-driven methods have come to the forefront of weather modelling. Major tech companies, including Google, NVIDIA, Huawei, and Microsoft, have released ML-based models that match or even surpass traditional NWP performance in some areas. Importantly, in its [2021 machine learning roadmap](https://www.ecmwf.int/en/elibrary/81207-machine-learning-ecmwf-roadmap-next-10-years), the European Centre for Medium-Range Weather Forecasts (ECMWF) itself recognized the growing relevance of ML methods and emphasised the need to integrate them into future forecasting systems.
 
@@ -33,32 +31,28 @@ For this reason, there is no guarantee that our data-driven models will respect 
 ### Pros and Cons
 One of the main strengths of machine learning models is their ability to capture complex, nonlinear relationships (something the Earth system is full of). This is why they have shown great promise, especially in medium-range forecasting (3–10 days), where traditional models begin to lose accuracy. Machine learning weather models wouldn’t be getting so much attention if their performance wasn’t competitive with NWPs. Various models have shown superior or comparative performance in terms of metrics such as RMSE and ACC when compared to NWP models. The image below from [Rackow et al.](https://arxiv.org/abs/2409.18529) shows performance in terms of RMSE (the lower the better) at different lead times for three ML models against an NWP (IFS). 
 
-<br><br>
+<br>
 <figure>
   <img src="/assets/post1_fig2.png" alt="ML Models RMSE" width="500" height="400" class="center-image">
   <figcaption>RMSE for ML and NWP models at multiple lead times</figcaption>
 </figure>
 
-<br><br>
-
 However, machine learning models require large amounts of data to be effective. Their performance often degrades in data-sparse regions or for rare and extreme events. In particular, studies have shown that ML models often underestimate the intensity of cyclones and other high-impact phenomena. The below figure from [Shi et al.](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2024JH000481) demonstrates this by showing the relative error of maximum wind speeds for a well known data-driven model, PanguWeather (PANGU-ECMWF, PANGU-NCEP, PANGU-ERA5; the same model with different initial conditions). It can be seen that compared to the other NWP models, PanguWeather has greater error (closer to zero is better), and greater dispersion.
 
-<br><br>
+<br>
 <figure>
   <img src="/assets/post1_fig3.jpg" alt="Pangu Errors" width="500" height="400" class="center-image">
   <figcaption>Pangu-Weather intensity errors compared to NWP models</figcaption>
 </figure>
-<br><br>
 
 Physical interpretability is another challenge. Unlike physics-based models, where each variable and equation has a clear meaning, neural networks are often black boxes. And while some studies suggest that these models learn physically meaningful structures, it’s also been shown their internal representations of physical systems may be lacking. For example, the ML model studied by [Baño-Medina et al.](https://www.nature.com/articles/s41612-025-00949-6) was shown to exhibit unexplained sensitivities to certain perturbations. In the below image, the figure on the right are the sensitivities from a NWP model and the figure on the left are the sensitivities from a data-driven model. The similarities near the bottom between the two are relatively good, supporting the notion that physical dynamics have been learnt. However, at the top of the left figure, sensitivities are observed not seen in the NWP one. There are also no known dynamics to explain this, suggesting that the ML model responded to perturbations that had no clear physical cause.
 
-<br><br>
+<br>
 
 <figure>
   <img src="/assets/post1_fig4.jpg" alt="Unexplained sensitivities" width="700" height="400" class="center-image">
   <figcaption>Perturbation sensitivities for an NWP model (left) and an ML model (right)</figcaption>
 </figure>
-<br><br>
 
 Other studies have noted that ML models tend to smooth out sharp gradients, reducing their practical resolution. In the study by [Bonavita](https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2023GL107377), it was noted that the "effective resolution" of the data-driven model is lower than the resolution of their input data. For instance, a model trained on ERA5 data at 0.25° resolution (~25 km) may produce outputs that are effectively closer to 1° (~100 km) or even coarser. Think of it like watching a 4K video that’s been blurred. While the file is high-res, the model 'sees' it more fuzzily.
 
