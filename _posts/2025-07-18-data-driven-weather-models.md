@@ -50,7 +50,7 @@ Physical interpretability is another challenge. Unlike physics-based models, whe
 <br>
 
 <figure>
-  <img src="/assets/post1_fig4.jpg" alt="Unexplained sensitivities" width="700" height="400" class="center-image">
+  <img src="/assets/post1_fig4.jpg" alt="Unexplained sensitivities" width="900" height="400" class="center-image">
   <figcaption class="figcaption-2">Perturbation sensitivities for an NWP model (left) and an ML model (right)</figcaption>
 </figure>
 
