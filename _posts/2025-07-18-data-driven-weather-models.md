@@ -4,9 +4,9 @@ For decades, weather forecasting has relied on physical simulations run on power
 
 A similar approach exists in climate science. In the Coupled Model Intercomparison Project Phase 6 (CMIP6), hundreds of climate models from research institutions worldwide generate projections over the coming century. These models simulate the Earth system by solving coupled physical equations for atmosphere, ocean, sea ice, and land, across millions of grid cells and time steps.
 
+<img src="/assets/post1_fig1.gif" alt="European Heatwave" width="600" height="360">
 
-
-In recent years, data-driven methods have come to the forefront of weather modelling. Major tech companies, including Google, NVIDIA, Huawei, and Microsoft, have released ML-based models that match or even surpass traditional NWP performance in some areas. Importantly, in its 2021 machine learning roadmap, European Centre for Medium-Range Weather Forecasts (ECMWF) itself recognized the growing relevance of ML methods and emphasized the need to integrate them into future forecasting systems.
+In recent years, data-driven methods have come to the forefront of weather modelling. Major tech companies, including Google, NVIDIA, Huawei, and Microsoft, have released ML-based models that match or even surpass traditional NWP performance in some areas. Importantly, in its [2021 machine learning roadmap](https://www.ecmwf.int/en/elibrary/81207-machine-learning-ecmwf-roadmap-next-10-years), European Centre for Medium-Range Weather Forecasts (ECMWF) itself recognized the growing relevance of ML methods and emphasized the need to integrate them into future forecasting systems.
 
 Why is this shift happening now? A major advantage of the current era is the abundance of publicly available datasets. Organisations like ECMWF (with its ERA5 dataset), the CMIP6 initiative, and many others have made large volumes of global weather and climate data publicly available. The ERA5 dataset, for example, offers hourly, global atmospheric data from 1950 to the present at fine spatial and temporal resolution. These datasets are key enablers of modern data-driven modeling. At the same time, important open-source programming libraries, like PyTorch, have lowered the barrier to entry, making it easier to build and train sophisticated models. 
 
