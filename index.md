@@ -1,5 +1,3 @@
-Here you can say lots of fun things about your site.
+I'm passionate about applying data-driven methods to climate and weather forecasting.
 
-Maybe say a some things about yourself.
-
-Or maybe what you plan to blog about.
+Here you'll find posts exploring recent research in the field, model architectures, key datasets, and the challenges and opportunities at the intersection of machine learning and Earth science.
