@@ -8,7 +8,7 @@ A similar approach exists in climate science. In the Coupled Model Intercomparis
 
 <figure>
   <img src="/assets/post1_fig1.gif" alt="European Heatwave" width="800" height="500" class="center-image">
-  <figcaption>RMSE for ML and NWP models at multiple lead times</figcaption>
+  <figcaption>European Heatwave July 2025 from ERA5 reanalysis data (1000hPa temperature)</figcaption>
 </figure>
 
 In recent years, data-driven methods have come to the forefront of weather modelling. Major tech companies, including Google, NVIDIA, Huawei, and Microsoft, have released ML-based models that match or even surpass traditional NWP performance in some areas. Importantly, in its [2021 machine learning roadmap](https://www.ecmwf.int/en/elibrary/81207-machine-learning-ecmwf-roadmap-next-10-years), the European Centre for Medium-Range Weather Forecasts (ECMWF) itself recognized the growing relevance of ML methods and emphasised the need to integrate them into future forecasting systems.
