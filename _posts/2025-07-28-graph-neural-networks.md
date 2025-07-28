@@ -7,7 +7,7 @@ At its core, a graph is a mathematical structure used to represent relationships
 
 Below is a simple example:
 <figure>
-  <img src="/assets/graph1.png" alt="Graph" width="400" height="300" class="center-image">
+  <img src="/assets/graph1.png" alt="Graph" width="300" height="300" class="center-image">
   <figcaption class="figcaption-2">Fig. 1: Graph with 7 nodes and 6 edges</figcaption>
 </figure>
 
@@ -125,8 +125,8 @@ To understand normalisation, we first introduce the concept of an adjacency matr
 Using a small toy graph (see Fig. 1), its adjacency matrix is (blue means 1, white means 0:
 
 <figure>
-  <img src="/assets/adj_matrix.png" alt="Cora Graph" width="800" height="500" class="center-image">
-  <figcaption class="figcaption-2">Fig. 2: Cora dataset</figcaption>
+  <img src="/assets/adj_matrix.png" alt="Cora Graph" width="500" height="400" class="center-image">
+  <figcaption class="figcaption-2">Fig. 3: Adjacency matrix</figcaption>
 </figure>
 
 Importantly, here we have added self-loops, i.e., we consider every node to be connected to itself. This results in 1's along the diagonal. While adjacency matrices by default exclude self-connections, adding them is crucial in GCNs because it allows each node to retain its own features during aggregation (see message passing).
