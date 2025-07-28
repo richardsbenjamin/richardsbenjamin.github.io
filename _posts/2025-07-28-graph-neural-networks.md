@@ -86,7 +86,7 @@ pred = model(data.x).argmax(dim=1)
 correct = pred[data.test_mask] == data.y[data.test_mask]
 acc = int(correct.sum()) / int(data.test_mask.sum())
 ```
-The last time this was run, the accuracy was about 56.6%. Not the most inspiring figure. In the next section, we'll see if we can improve the model's accuracy by leveraging the graph structure of the dataset. 
+The last time this was run, the accuracy was about **56.6%**. Not the most inspiring figure. In the next section, we'll see if we can improve the model's accuracy by leveraging the graph structure of the dataset. 
 
 ## Using a Graph Neural Network
 Now we implement a Graph Neural Network (GNN) to solve the same classification task. To ensure a fair comparison with the MLP, we'll keep the architecture similar: two layers, with a ReLU activation in between, followed by softmax for classification. The key difference is that instead of standard linear layers, we’ll use graph layers.
