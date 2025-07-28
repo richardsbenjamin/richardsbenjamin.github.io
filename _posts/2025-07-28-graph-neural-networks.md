@@ -231,7 +231,7 @@ correct = pred[data.test_mask] == data.y[data.test_mask]
 acc = int(correct.sum()) / int(data.test_mask.sum()) # About 81%
 ```
 
-After training this GCN-based model on the Cora dataset, we observe a test accuracy of **81%**, which is a significant improvement over the baseline MLP (56.6%).
+After training this GCN-based model on the Cora dataset, we observe a test accuracy of **81%**, which is a significant improvement over the baseline MLP (**56.6%**).
 
 This demonstrates the strength of GNNs: by leveraging the graph structure, the model can aggregate useful contextual information and make more accurate predictions. In a future post, we'll explore how GNNs are used in weather forecasting, including models like GraphCast.
 
