@@ -1,0 +1,2 @@
+In this article, we’ll explore Graph Neural Networks (GNNs): what they are, how they work, and why they’re useful. We’ll walk through a practical example using a well-known graph-based dataset to solve a node classification problem with a GNN. Along the way, we’ll also touch on GraphCastNet—a recent GNN architecture—and its implementation. All code used in this tutorial is available on GitHub [link].
+
