@@ -84,17 +84,17 @@ In FourCastNetv2, the gradient of KE with respect to the initial conditions is c
 The figure below shows side-by-side comparisons of sensitivity fields from the adjoint model (a, b, c) and the AI model (d, e, f). Warm colors indicate regions where small increases in the initial values lead to higher KE at the forecast time, while cold colors indicate regions where decreases have the same effect.
 
 <figure>
-  <img src="/assets/post3_image1.png" alt="Graph" width="300" height="300" class="center-image">
+  <img src="/assets/post3_image1.png" alt="Graph" width="700" height="800" class="center-image">
 </figure>
-
+<br>
 The comparison reveals striking agreement between the two methods. For example, the meridional wind sensitivity shows a characteristic S-shaped structure west of Portugal, which appears clearly in both the adjoint (c) and the AI model (f). This suggests that the AI model has learned a physically meaningful mechanism for cyclone intensification.
 
 The next figure shows a vertical cross-section of sensitivity to relative humidity in the AI model, compared to specific humidity sensitivities from the physics-based model along the same northwest–southeast transect.
 
 <figure>
-  <img src="/assets/post1_fig4.jpg" alt="Graph" width="300" height="300" class="center-image">
+  <img src="/assets/post1_fig4.jpg" alt="Graph" width="900" height="300" class="center-image">
 </figure>
-
+<br>
 Overall, the vertical structure of the sensitivity fields aligns well between the two models. However, the AI model exhibits a positive sensitivity at upper atmospheric levels not present in the adjoint output. Since there is no known physical mechanism linking these upper-level features to low-level KE, this may indicate a spurious or non-physical correlation learned by the neural network.
 
 Identifying such artifacts is essential. They highlight areas where the model might be overfitting or relying on statistically useful but physically implausible patterns, issues that must be addressed if AI weather models are to gain the same level of trust as traditional models.
