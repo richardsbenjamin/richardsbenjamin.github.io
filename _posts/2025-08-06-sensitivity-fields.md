@@ -82,7 +82,7 @@ where $u_i$ and $v_i$ are the zonal and meridional wind components at grid point
 In FourCastNetv2, the gradient of KE with respect to the initial conditions is computed using PyTorch’s autograd engine, applying the chain rule through backpropagation. In the NWP model, the same gradient is obtained via the adjoint of a physics-based numerical model.
 
 The figure below shows side-by-side comparisons of sensitivity fields from the adjoint model (a, b, c) and the AI model (d, e, f). Warm colors indicate regions where small increases in the initial values lead to higher KE at the forecast time, while cold colors indicate regions where decreases have the same effect.
-
+<br>
 <figure>
   <img src="/assets/post3_image1.png" alt="Graph" width="700" height="800" class="center-image">
 </figure>
@@ -90,7 +90,7 @@ The figure below shows side-by-side comparisons of sensitivity fields from the a
 The comparison reveals striking agreement between the two methods. For example, the meridional wind sensitivity shows a characteristic S-shaped structure west of Portugal, which appears clearly in both the adjoint (c) and the AI model (f). This suggests that the AI model has learned a physically meaningful mechanism for cyclone intensification.
 
 The next figure shows a vertical cross-section of sensitivity to relative humidity in the AI model, compared to specific humidity sensitivities from the physics-based model along the same northwest–southeast transect.
-
+<br>
 <figure>
   <img src="/assets/post1_fig4.jpg" alt="Graph" width="900" height="300" class="center-image">
 </figure>
