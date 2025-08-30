@@ -36,7 +36,207 @@ Since different datasets have different numbers of atmospheric pressure levels, 
 In parallel, the surface embedding goes through a residual MLP. The outputs are concatenated to form a $(C_L + 1) \times D$ representation of the full weather state at each patch.
 
 <figure>
-  <img src="/assets/graph1.png" alt="Graph" width="300" height="300" class="center-image">
-  <figcaption class="figcaption-2">Fig. 1: Graph with 7 nodes and 6 edges</figcaption>
+  <img src="/assets/aurora_encoder.png" alt="Graph" width="300" height="300" class="center-image">
+  <figcaption class="figcaption-2">Fig. 1. Aurora's encoder module (adapted from Bodnar et al., 2025, Nature)</figcaption>
 </figure>
+
+The latent 3D grid produced by the encoder can be seen as a mesh on which the simulation takes place. The backbone then acts as the neural simulator. Aurora uses the Transformer as the baseline architecture. 
+
+Aurora uses a 3D Swin Transformer U-Net backbone. It has an encoder and a decoder (these are separate to the encoder/decoder of the entire Aurora model), each made of three stages:
+- After each encoder stage, the spatial resolution is halved.
+- After each decoder stage, the resolution is doubled and combined with the matching encoder outputs.
+
+Each layer applies 3D Swin Transformer blocks, where self-attention is restricted to local regions (called windows). To allow information to spread further, windows are shifted by half their size along each axis at every other layer. Because the Earth is spherical, the windows wrap around longitudinally, ensuring continuity across the globe. This design mimics the local computations of numerical solvers, but avoids the quadratic cost of vanilla Transformers.
+
+The res-post-norm stabilization from Swin v2 is applied but the standard dot-product attention from v1 (rather than cosine attention from v2) is kept. Unlike some transformer architectures that rely on positional biases, Aurora encodes positional information entirely in its input embeddings, which enables it to operate flexibly across multiple resolutions.
+
+<figure>
+  <img src="/assets/aurora_processor.png" alt="Graph" width="300" height="300" class="center-image">
+  <figcaption class="figcaption-2">Fig. 1. Aurora's backbone (adapted from Bodnar et al., 2025, Nature)</figcaption>
+</figure>
+
+The decoder takes the standardised latent simulation and maps it back to images on the latitude–longitude grid. Its structure mirrors the encoder.
+
+The three latent atmospheric pressure levels are expanded back into the original $C$ pressure levels using a Perceiver layer, which queries the latent state with sinusoidal embeddings of the target pressure levels. Each decoded level is then turned into $P\times P$ patches through a linear projection, just as in the encoder. The latent surface state is decoded directly.
+
+## Data Infrastructure
+As noted in Aurora’s article, one of the biggest challenges of training Aurora wasn’t the model itself, but getting the data to the GPUs fast enough. Each data sample can be huge (up to 2GB) and Aurora has to learn from many different datasets, all with different formats, resolutions, and variables. Balancing that workload across GPUs is far from trivial.
+
+Because the datasets are so big, they stored everything in the cloud (Azure Blob Storage), and then implemented some optimisations to ensure efficient downloading of the data:
+- Place data close to compute to reduce latency and cost.
+- Split datasets into smaller files so workers don’t need to download more than they need.
+- Compress large datasets to reduce bandwidth use.
+- Group all variables for a given timestep into the same file to minimise concurrent downloads
+
+They also built a flexible multi-source data loader to handle this complexity. Each dataset is defined by a simple YAML config, which specifies things like location, lead times, and input history. From this, the system creates lightweight BatchGenerator objects that know how to produce batches from that dataset. Each dataset produces its own stream BatchGenerator objects.
+
+These batch streams are mixed together, shuffled, and distributed across GPUs. Only then do the heavy operations happen: downloading, decompressing, reading, mapping variables to a shared schema, cleaning (e.g. handling NaNs), batching, and finally moving data onto devices. All of this runs across multiple workers to maximise throughput.
+
+This approach to handling data heterogeneity differs with the simple method of training Vision Transformers to handle multi-resolution inputs, which shifts the problem to the model itself, and is associated with various architectural constraints and often fails to reach peak efficiency on current hardware. 
+
+## Running the Code
+Fortunately, running inference on the model does not require the same infrastructure as for training it.
+
+With Aurora's GitHub, we can run the model, calculate the RMSE, and compare it to HRES, a traditional numerical prediction model. For this comparison, we use WeatherBench2’s ERA5 reanalysis as the reference dataset and HRES as the NWP benchmark. This allows us to quantify Aurora’s skill relative to a state-of-the-art numerical weather prediction model over the same temporal and spatial domains, providing a consistent evaluation framework. 
+
+A portion of the code for running the Aurora model is shown below. The full notebook can be found [here](). The code is adapted from Microssoft's own [example]().
+
+
+```python
+from aurora import Aurora, Batch, Metadata
+from aurora import rollout as aurora_rollout
+import numpy as np
+import torch
+
+# Helper functions and classes
+
+class AuroraStatic:
+
+    def __init__(self, drive_path: str) -> None:
+        self.static = temp = xr.open_dataset(f"{drive_path}//aurora/static.nc")
+
+def get_aurora_batch(surface_vars: xr.Dataset, static_vars: xr.Dataset, atmos_vars: xr.Dataset) -> Batch:
+    return Batch(
+        surf_vars={
+            "2t": torch.from_numpy(surface_vars["2m_temperature"].values[None]),
+            "10u": torch.from_numpy(surface_vars["10m_u_component_of_wind"].values[None]),
+            "10v": torch.from_numpy(surface_vars["10m_v_component_of_wind"].values[None]),
+            "msl": torch.from_numpy(surface_vars["mean_sea_level_pressure"].values[None]),
+        },
+        static_vars={
+            "z": torch.from_numpy(static_vars["z"].values[0]),
+            "slt": torch.from_numpy(static_vars["slt"].values[0]),
+            "lsm": torch.from_numpy(static_vars["lsm"].values[0]),
+        },
+        atmos_vars={
+            "t": torch.from_numpy(atmos_vars["temperature"].values[None]),
+            "u": torch.from_numpy(atmos_vars["u_component_of_wind"].values[None]),
+            "v": torch.from_numpy(atmos_vars["v_component_of_wind"].values[None]),
+            "q": torch.from_numpy(atmos_vars["specific_humidity"].values[None]),
+            "z": torch.from_numpy(atmos_vars["geopotential"].values[None]),
+        },
+        metadata=Metadata(
+            lat=torch.from_numpy(surface_vars.latitude.values),
+            lon=torch.from_numpy(surface_vars.longitude.values),
+            time=(surface_vars.time.values.astype("datetime64[s]").tolist()[1],),
+            atmos_levels=tuple(int(level) for level in atmos_vars.level.values),
+        ),
+    )
+
+def get_aurora_data(x_subset: xr.Dataset, static_data: AuroraStatic) -> Batch:
+    surface_data = x_subset[vars["aurora"]["surface"]]
+    atmos_data = x_subset[vars["aurora"]["atmospheric"]].sel(
+        level=levels[vars["aurora"]["levels"]],
+    )
+    return get_aurora_batch(
+        surface_data,
+        static_data.static,
+        atmos_data,
+    )
+
+def _np(x: torch.Tensor) -> np.ndarray:
+    return x.detach().cpu().numpy().squeeze()
+
+def get_dataset_from_batch(batch: Batch) -> xr.Dataset:
+    return xr.Dataset(
+            {
+                **{
+                    vars["aurora"]["batch"]["surf"][k]: (("time", "latitude", "longitude"), _np(v)[None, ...])
+                    for k, v in batch.surf_vars.items()
+                },
+                **{
+                    f"static_{k}": (("latitude", "longitude"), _np(v))
+                    for k, v in batch.static_vars.items()
+                },
+                **{
+                    vars["aurora"]["batch"]["atmos"][k]: (("time", "level", "latitude", "longitude"), _np(v)[None, ...])
+                    for k, v in batch.atmos_vars.items()
+                },
+            },
+            coords={
+                "latitude": _np(batch.metadata.lat),
+                "longitude": _np(batch.metadata.lon),
+                "time": list(batch.metadata.time),
+                "level": list(batch.metadata.atmos_levels),
+                "rollout_step": batch.metadata.rollout_step,
+            },
+        )
+
+def get_aurora_dataset(batches: list[Batch]) -> xr.Dataset:
+    datasets = [
+        get_dataset_from_batch(batch) for batch in batches
+    ]
+    return xr.concat(datasets, dim="time")
+
+def get_aurora_model(device: torch.device) -> Aurora:
+    model = Aurora(use_lora=False)
+    model.load_checkpoint("microsoft/aurora", "aurora-0.25-pretrained.ckpt")
+    model.eval()
+    model = model.to(device)
+    return model
+
+def run_aurora(model: Aurora, data: Batch, eval_steps: int, device: torch.device) -> Batch:
+    with torch.inference_mode():
+        preds = [pred.to(device) for pred in aurora_rollout(model, data, steps=eval_steps)]
+    return preds
+
+def compute_L(latitudes_deg):
+    latitudes_rad = np.deg2rad(latitudes_deg)
+    N_lat = len(latitudes_rad)
+    weights = np.cos(latitudes_rad)
+    L = N_lat * (weights / np.sum(weights))
+    return L
+
+def rmse(A_hat, A, latitudes):
+    N_lat, N_lon, = A.shape
+    L = compute_L(latitudes)
+    L_expanded = L[:, None]
+    diff2 = (A_hat - A) ** 2
+    weighted_diff2 = L_expanded * diff2
+    mse = np.sum(weighted_diff2, axis=(0,1)) / (N_lat * N_lon)
+    return np.sqrt(mse)
+
+
+# WeatherBench2's datasets via zarr
+era5_path = "https://storage.googleapis.com/weatherbench2/datasets/era5/"
+era5_file = f"{era5_path}1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr"
+eval_start = "2022-08-07T06:00"
+eval_end = "2022-08-10T00:00"
+
+era5_ds = xr.open_zarr(era5_file)
+era5_subset = era5_ds[[*var_set2]].sel(time=slice(eval_start, eval_end))
+
+
+# Set up model
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+aurora_model = get_aurora_model(device)
+
+x_init = era5_subset.isel(time=[0,1]) # Aurora takes two time steps as input
+aurora_data = get_aurora_data(x_init, aurora_static)
+aurora_predict = run_aurora(aurora_model, aurora_data, n_time, device)
+aurora_dataset = get_aurora_dataset(aurora_predict) # Convert the Batch objects to an xarray
+
+# Calculate RMSE for various time steps
+var = "2m_temperature"
+aurora_var = aurora_dataset[var]
+era5_var = era5_subset[var]
+
+rmses = []
+
+for time in aurora_var.time:
+  forecast = aurora_var.sel(time=time)
+  reference = era5_var.sel(time=time).sel(latitude=forecast.latitude)
+  aurora_rmses[var].append(
+      rmse(
+          forecast.values,
+          reference.values,
+          forecast.latitude.values,
+      )
+  )
+
+```
+
+
+
+
 
