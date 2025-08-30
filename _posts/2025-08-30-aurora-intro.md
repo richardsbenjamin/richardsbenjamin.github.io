@@ -52,7 +52,7 @@ The res-post-norm stabilization from Swin v2 is applied but the standard dot-pro
 
 <figure>
   <img src="/assets/aurora_processor.PNG" alt="Graph" width="300" height="300" class="center-image">
-  <figcaption class="figcaption-2">Fig. 1. Aurora's backbone (adapted from Bodnar et al., 2025, Nature)</figcaption>
+  <figcaption class="figcaption-2">Fig. 2. Aurora's backbone (adapted from Bodnar et al., 2025, Nature)</figcaption>
 </figure>
 
 The decoder takes the standardised latent simulation and maps it back to images on the latitude–longitude grid. Its structure mirrors the encoder.
@@ -77,7 +77,7 @@ This approach to handling data heterogeneity differs with the simple method of t
 ## Running the Code
 Fortunately, running inference on the model does not require the same infrastructure as for training it.
 
-With Aurora's GitHub, we can run the model, calculate the RMSE, and compare it to HRES, a traditional numerical prediction model. For this comparison, we use WeatherBench2’s ERA5 reanalysis as the reference dataset and HRES as the NWP benchmark. This allows us to quantify Aurora’s skill relative to a state-of-the-art numerical weather prediction model over the same temporal and spatial domains, providing a consistent evaluation framework. 
+With Aurora's GitHub, we can run the model, calculate the RMSE, and compare it a traditional numerical prediction model (NWP). For this comparison, we use WeatherBench2’s ERA5 reanalysis as the reference dataset and HRES as the NWP benchmark. This allows us to quantify Aurora's skill relative to a state-of-the-art numerical weather prediction model over the same temporal and spatial domains. 
 
 A portion of the code for running the Aurora model is shown below. The full notebook can be found [here](https://colab.research.google.com/drive/13wygipAg_hSIeylcQWyF1uojE_JyiyFl?usp=sharing). The code is adapted from Microsoft's own [example](https://microsoft.github.io/aurora/example_era5.html).
 
@@ -235,6 +235,26 @@ for time in aurora_var.time:
   )
 
 ```
+
+This produces the RMSE's for the Aurora model. We also need to calculate the RMSE's for the HRES model. This is left in the full notebook.
+
+Below is the resulting plot, showing the global RMSE for Aurora and HRES IFS. 
+
+<figure>
+  <img src="/assets/aurora_hres_rmse.png" alt="Graph" width="300" height="300" class="center-image">
+  <figcaption class="figcaption-2">Fig. 3. Global RMSE Aurora compared to HRES</figcaption>
+</figure>
+
+For 2-meter temperature, Aurora and HRES perform very similarly. HRES begins with slightly lower error immediately after initialization, but Aurora quickly catches up, and by 9 August the two curves are nearly indistinguishable. Both models show steadily increasing RMSE with forecast lead time, which is expected, but neither gains a clear advantage. This indicates that Aurora is essentially on par with HRES in predicting near-surface temperature.
+
+For the 10-meter wind components, Aurora shows a consistent advantage. In both the U and V components, the Aurora RMSE remains systematically lower than HRES throughout the forecast period. The gap is fairly stable, suggesting that Aurora maintains better skill in capturing near-surface wind variability. This is a notable result, since wind fields are typically more difficult to predict than temperature or pressure, and Aurora appears to outperform the operational model here.
+
+The situation is slightly different for mean sea level pressure. At very short lead times, HRES has a small advantage, reflecting its direct assimilation of observations into the initial conditions. However, Aurora steadily reduces the gap and by the second day the two models perform almost identically. Over the remainder of the forecast window, their errors evolve in parallel, showing essentially equivalent skill.
+
+Taken together, these comparisons show that Aurora is at least competitive with HRES, and in some cases superior. For surface winds, Aurora provides consistently better forecasts, while for near-surface temperature and pressure the two models are broadly comparable. The fact that Aurora can match or surpass HRES performance in multiple key variables highlights the strength of deep learning–based forecasting systems relative to traditional NWP.
+
+
+
 
 
 
