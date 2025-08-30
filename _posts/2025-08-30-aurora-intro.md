@@ -241,7 +241,7 @@ This produces the RMSE's for the Aurora model. We also need to calculate the RMS
 Below is the resulting plot, showing the global RMSE for Aurora and HRES IFS. 
 
 <figure>
-  <img src="/assets/aurora_hres_rmse.png" alt="Graph" width="300" height="300" class="center-image">
+  <img src="/assets/auroa_hres_rmse.png" alt="Graph" width="300" height="300" class="center-image">
   <figcaption class="figcaption-2">Fig. 3. Global RMSE Aurora compared to HRES</figcaption>
 </figure>
 
