@@ -36,7 +36,7 @@ Since different datasets have different numbers of atmospheric pressure levels, 
 In parallel, the surface embedding goes through a residual MLP. The outputs are concatenated to form a $(C_L + 1) \times D$ representation of the full weather state at each patch.
 
 <figure>
-  <img src="/assets/aurora_encoder.png" alt="Graph" width="300" height="300" class="center-image">
+  <img src="/assets/aurora_encoder.PNG" alt="Graph" width="300" height="300" class="center-image">
   <figcaption class="figcaption-2">Fig. 1. Aurora's encoder module (adapted from Bodnar et al., 2025, Nature)</figcaption>
 </figure>
 
@@ -51,7 +51,7 @@ Each layer applies 3D Swin Transformer blocks, where self-attention is restricte
 The res-post-norm stabilization from Swin v2 is applied but the standard dot-product attention from v1 (rather than cosine attention from v2) is kept. Unlike some transformer architectures that rely on positional biases, Aurora encodes positional information entirely in its input embeddings, which enables it to operate flexibly across multiple resolutions.
 
 <figure>
-  <img src="/assets/aurora_processor.png" alt="Graph" width="300" height="300" class="center-image">
+  <img src="/assets/aurora_processor.PNG" alt="Graph" width="300" height="300" class="center-image">
   <figcaption class="figcaption-2">Fig. 1. Aurora's backbone (adapted from Bodnar et al., 2025, Nature)</figcaption>
 </figure>
 
@@ -79,7 +79,7 @@ Fortunately, running inference on the model does not require the same infrastruc
 
 With Aurora's GitHub, we can run the model, calculate the RMSE, and compare it to HRES, a traditional numerical prediction model. For this comparison, we use WeatherBench2’s ERA5 reanalysis as the reference dataset and HRES as the NWP benchmark. This allows us to quantify Aurora’s skill relative to a state-of-the-art numerical weather prediction model over the same temporal and spatial domains, providing a consistent evaluation framework. 
 
-A portion of the code for running the Aurora model is shown below. The full notebook can be found [here](). The code is adapted from Microssoft's own [example]().
+A portion of the code for running the Aurora model is shown below. The full notebook can be found [here](https://colab.research.google.com/drive/13wygipAg_hSIeylcQWyF1uojE_JyiyFl?usp=sharing). The code is adapted from Microsoft's own [example](https://microsoft.github.io/aurora/example_era5.html).
 
 
 ```python
