@@ -36,7 +36,7 @@ Since different datasets have different numbers of atmospheric pressure levels, 
 In parallel, the surface embedding goes through a residual MLP. The outputs are concatenated to form a $(C_L + 1) \times D$ representation of the full weather state at each patch.
 
 <figure>
-  <img src="/assets/aurora_encoder.PNG" alt="Graph" width="300" height="300" class="center-image">
+  <img src="/assets/aurora_encoder.PNG" alt="Graph" width="900" height="300" class="center-image">
   <figcaption class="figcaption-2">Fig. 1. Aurora's encoder module (adapted from Bodnar et al., 2025, Nature)</figcaption>
 </figure>
 
@@ -51,7 +51,7 @@ Each layer applies 3D Swin Transformer blocks, where self-attention is restricte
 The res-post-norm stabilization from Swin v2 is applied but the standard dot-product attention from v1 (rather than cosine attention from v2) is kept. Unlike some transformer architectures that rely on positional biases, Aurora encodes positional information entirely in its input embeddings, which enables it to operate flexibly across multiple resolutions.
 
 <figure>
-  <img src="/assets/aurora_processor.PNG" alt="Graph" width="300" height="300" class="center-image">
+  <img src="/assets/aurora_processor.PNG" alt="Graph" width="900" height="300" class="center-image">
   <figcaption class="figcaption-2">Fig. 2. Aurora's backbone (adapted from Bodnar et al., 2025, Nature)</figcaption>
 </figure>
 
@@ -241,7 +241,7 @@ This produces the RMSE's for the Aurora model. We also need to calculate the RMS
 Below is the resulting plot, showing the global RMSE for Aurora and HRES IFS. 
 
 <figure>
-  <img src="/assets/auroa_hres_rmse.png" alt="Graph" width="300" height="300" class="center-image">
+  <img src="/assets/auroa_hres_rmse.png" alt="Graph" width="800" height="500" class="center-image">
   <figcaption class="figcaption-2">Fig. 3. Global RMSE Aurora compared to HRES</figcaption>
 </figure>
 
