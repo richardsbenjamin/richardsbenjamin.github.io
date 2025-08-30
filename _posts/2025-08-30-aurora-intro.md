@@ -251,7 +251,9 @@ For the 10-meter wind components, Aurora shows a consistent advantage. In both t
 
 The situation is slightly different for mean sea level pressure. At very short lead times, HRES has a small advantage, reflecting its direct assimilation of observations into the initial conditions. However, Aurora steadily reduces the gap and by the second day the two models perform almost identically. Over the remainder of the forecast window, their errors evolve in parallel, showing essentially equivalent skill.
 
-Taken together, these comparisons show that Aurora is at least competitive with HRES, and in some cases superior. For surface winds, Aurora provides consistently better forecasts, while for near-surface temperature and pressure the two models are broadly comparable. The fact that Aurora can match or surpass HRES performance in multiple key variables highlights the strength of deep learning–based forecasting systems relative to traditional NWP.
+Taken together, these comparisons show that Aurora is at least competitive with HRES, and in some cases superior. For surface winds, Aurora provides consistently better forecasts, while for near-surface temperature and pressure the two models are broadly comparable.
+
+The fact that Aurora can match or surpass HRES performance in multiple key variables highlights the strength of deep learning–based forecasting systems relative to traditional NWP.
 
 
 
