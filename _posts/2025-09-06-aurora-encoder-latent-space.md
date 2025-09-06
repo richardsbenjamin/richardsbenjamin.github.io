@@ -63,7 +63,27 @@ Our analysis uses two approaches: principal component analysis (PCA) for visuali
 To prepare the labels, we start from Aurora’s static land–sea mask and downsample it by the patch size. A patch is classified as land if more than 50% of its area is land, otherwise it’s ocean. This gives us patch-level labels aligned with the encoder's embeddings.
 
 ```python
+import numpy as np
 import xarray as xr
+
+def reduce_mask(land_sea_mask: np.ndarray, patch_size: int) -> np.ndarray:
+    n_lat_patches = land_sea_mask.shape[0] // patch_size
+    n_lon_patches = land_sea_mask.shape[1] // patch_size
+    land_sea_mask_patched = np.zeros((n_lat_patches, n_lon_patches), dtype=np.int8)
+    for i in range(n_lat_patches):
+        for j in range(n_lon_patches):
+            lat_slice = slice(i * patch_size, (i+1) * patch_size)
+            lon_slice = slice(j * patch_size, (j+1) * patch_size)
+            patch_data = land_sea_mask[lat_slice, lon_slice]
+            
+            mean_val = np.mean(patch_data)
+            if mean_val >= 0.5:
+                land_sea_mask_patched[i, j] = 1
+            else:
+                land_sea_mask_patched[i, j] = 0
+
+    return land_sea_mask_patched
+
 
 static = xr.open_dataset("static.nc")
 
@@ -117,6 +137,44 @@ For evaluation, we split the globe into training and testing regions. All patche
 After classification, we can also map the errors back onto the globe to see where the regression fails, highlighting regions where the encoder's representation of land–sea differences is less distinct.
 
 ```python
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+
+def get_train_test_split(
+        test_lon_min: float,
+        test_lon_max: float,
+        patch_center_lon: np.ndarray,
+        y: np.ndarray,
+        embedding: np.ndarray,
+    ) -> None:
+    is_test_region = (patch_center_lon >= test_lon_min) & (patch_center_lon <= test_lon_max)
+
+    is_training_region = ~is_test_region 
+
+    X_train = embedding[:, is_training_region].T
+    y_train = y[is_training_region]
+
+    X_test = surf_embedding[:, is_test_region].T
+    y_test = y[is_test_region]  
+
+    return {
+        "X_train": X_train,
+        "y_train": y_train,
+        "X_test": X_test,
+        "y_test": y_test,
+        "is_test_region": is_test_region,
+    }
+
+def run_logistic_regression(train_split_dict: dict) -> dict:
+    clf = LogisticRegression(max_iter=1000)
+    clf.fit(train_split_dict["X_train"], train_split_dict["y_train"])
+    y_pred = clf.predict(train_split_dict["X_test"])
+    return {
+        "model": clf,
+        "y_pred": y_pred,
+        "acc": accuracy_score(train_split_dict["y_test"], y_pred),
+    }
+
 test_lon_min = 120.0
 test_lon_max = 210.0
 
