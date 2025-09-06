@@ -1,32 +1,27 @@
 # Exploring the Latent Space of Aurora's Encoder
-In a previous [post](https://richardsbenjamin.github.io/2025/08/30/aurora-intro.html), I gave an overview on Microsoft's Aurora model.
+In a previous [post](https://richardsbenjamin.github.io/2025/08/30/aurora-intro.html), I introduced Microsoft’s Aurora model, outlining its architecture and the motivations behind its design.
 
-In this post, we are going peak inside the latent space of the model's encoder to see what kind of representations it has learnt. The intention is that the encoder learns an embedded representation of the inputs, whereas the model's processor learns the dynamics, and so we are unlikely to find representations of physical dynamics. However, we may be able to find certains distinctions present in the input space. 
+In this post, we’ll take a closer look inside the latent space of the model’s encoder to examine what kinds of representations it has learned. The role of the encoder is to compress inputs into an embedded representation, while the processor component is responsible for modeling temporal dynamics. Because of this division of labor, we should not expect the encoder to capture explicit information about physical processes or time evolution. Instead, we might uncover structural distinctions present in the raw input data itself.
 
-In this analysis, we'll be looking at whether the latent space has learnt the difference between ocean and land, and...
+Specifically, this analysis will focus on whether the latent space encodes a clear separation between land and ocean. If such a distinction emerges, it would suggest that the encoder is capturing meaningful features tied to the geography of the input fields, an encouraging sign that the model is developing representations aligned with real-world structure. If not, it may point to limitations in the encoder’s ability to disentangle different components of the input space.
 
 ## What is the Latent Space?
-The latent space is a compressed, numerical representation (often a high-dimensional vector) that the model's encoder produces from an input (e.g., an image, audio clip, or molecule). It's a "bottleneck" layer where the model encodes the most salient features of the input in a way it finds useful for its task (e.g., reconstruction, prediction, generation).
+The latent space is a compressed, numerical representation (often a high-dimensional vector) produced by the encoder from raw inputs such as global temperature fields, wind patterns, or precipitation maps. It acts as a bottleneck layer where the model distills the most important spatial and statistical features of the atmosphere and surface conditions into a compact form.
 
-The goal of your exploration is to understand the structure and semantics of this space. What directions correspond to meaningful features? How are different concepts organized?
-
+Exploring this space helps reveal how the model internally organises weather information. By probing the latent space, we can better understand not just what the model predicts, but how it represents the underlying weather features it relies on.
 
 ## The Encoder Ouput
-If you read Aurora's paper (and my last post), you'll understand that the encoder's output is a...
+The encoder's output is a matrix of size $512\times 259,200$. To interpret it, it will be fruitful to understand how it was constructed. 
+ 
+Surface and static inputs are combined into a tensor of size $2\times 7 \times720\times 1440$ (two time steps, seven variables, global grid). With a patch size of 4 and embedding dimension of 512, the surface encoder produces $512\times 180\times 360$, which is then flattened to $512\times 64800\times 1$.
 
-The output of the Aurora's encoder is a matrix of size $512x259200$. To do some analysis on the space, it will be fruitful to understand how it was constructed. 
+Atmospheric inputs start as $2\times 5\times 13\times 720\times 1440$ (two time steps, five variables, 13 pressure levels). Using the same patching scheme, this becomes $512\times 64800\times 3$. 
 
-Firstly, the surface, static and atmospheric data are passed separately as input to the encoder. 
+Stacking surface and atmospheric embeddings yields $512\times 64800 \times4$, which is flattened again to the final $512\times 259200$. Each column is an embedded vector representing either a surface patch or an atmospheric patch at a given level. Together, they cover the full globe.
 
-The surface and static data are concatenated together to give a tensor of size $2x7x720x1440$. Here we have 2 time steps, 7 variables in total, 720 longitudes points and 1440 latitude points. The patch size of the surface encoder is 4, and the embedded dimension is 512. This produces an embedded output of $512x180x360$. They flatten the last two dimensions and arrange it as $512x64800x1$.
+This structure is important because later we'll want to map vectors back to their original patches—for example, to test whether the latent space separates land from ocean or different atmospheric regimes.
 
-For the atmospheric data, we start with a tensor of size $2x5x13x720x1440$; 2 time steps, 5 variables, 13 atmospheric levels, and the longitude and latitude points. We have the same patch size and embedded dimension as the surface encoder, but we also have the atmospheric variables to be compressed together. Because of this, the resulting emebedded output is $512x64800x3$. 
-
-For the next step, we stack the surface and atmospheric embeddings together to obtain a tensor of size $512x64800x4$, and we flatten the last two dimensions again to produce the final output of $512x259200$. With this, we have 259,200 embedded vectors, and because of this structure, for a given embedded vector, it will either be a representation of the surface or one of the atmospheric levels. However, note that all of the embedded surface vectors together represent the either plant (the full longitude / latitude range), same for the atmospheric levels, and a single vector represents a patch. 
-
-This will be useful to know because later on, we will want to map embedded vectors back to the original patch to execute some classification tasks on the embedded space. 
-
-To get the Aurora ouput, we need to load the model and pass the input directly to the encoder. 
+To generate these embeddings, we pass the input fields directly through Aurora’s encoder. 
 
 ```python
 
@@ -61,11 +56,11 @@ atmos_embedding = reshaped_res[1:]
 
 ## Ocean and Land
 
-We are going to explore whether the encoder has learnt the difference between ocean and land. When training the aurora model, we pass an ocean and land mask, so it makes sense that it has learnt the difference between the two. However, it's only learnt this difference because it has been deemed relevant to the predictions, which is true the in actualy dynamic system, so this is evidecne that the encoder has learnt real physics. 
+Next, we test whether the encoder has learned to distinguish ocean from land. During training, Aurora receives a land–sea mask as input, so it's reasonable to expect this distinction to appear in the latent space. Importantly, this separation matters physically as land and ocean respond differently to forcing, so learning this boundary is consistent with the underlying dynamics. However, there is no guarantee that it has learnt this boundary. 
 
-For the analysis, we will perform principal component analysis (PCA) and visualise the results. We'll also perform logistic regression using the land-sea mask as labels.
+Our analysis uses two approaches: principal component analysis (PCA) for visualisation, and logistic regression with the land–sea mask as labels to quantify separability.
 
-One of the first things that we need to do is generate the land-sea labels. We start the land-sea mask from the Aurora static, but then we need to reduce the mask by a factor of the patch size. This way we obtain the land sea mask for the patches (the patch is consdired land if more than 50% of the patch is land). 
+To prepare the labels, we start from Aurora’s static land–sea mask and downsample it by the patch size. A patch is classified as land if more than 50% of its area is land, otherwise it’s ocean. This gives us patch-level labels aligned with the encoder's embeddings.
 
 ```python
 import xarray as xr
@@ -80,7 +75,9 @@ land_sea_mask_patched = reduce_mask(land_sea_mask, patch_size)
 ```
 
 ### PCA
-PCA is a machine learning technique that finds the directions of maximum variance. It's crucial for understanding the global primary axes of variation in your data. 
+PCA is a machine learning technique that identifies the directions of maximum variance in a dataset. In our context, it helps reveal the dominant modes of variation in Aurora's latent space—showing whether the model organises patches by features such as land–ocean boundaries, latitude bands, or large-scale climate gradients.
+
+By projecting the high-dimensional embeddings onto the first few principal components, we can visualise and interpret how the encoder structures weather and climate information.
 
 ```python
 from sklearn.decomposition import PCA
@@ -113,11 +110,11 @@ This indicates a clear but not perfect separation, as the two clusters are not e
 The overlap indicates that some oceanic regions share characteristics with land, such as coastal zones or enclosed seas, and vice versa. Overall, the PCA reveals a marked separation between the latent vectors of land and ocean, with high explained variance, showing that the latent space effectively encodes this physical distinction, even though intermediate zones exist.
 
 ### Logistic Regression
-Next we'll be doing a logistic regression, attempting to predict whether a given patch is ocean or land using the patch embedding as input. This allows us to assess whether the latent vectors have encoded the land-sea distinction. 
+We next apply logistic regression to predict whether a patch corresponds to land or ocean, using the latent vectors as input. This tests directly whether the encoder has encoded the land–sea boundary.
 
-We'll split the vector space into a train and test region. The test region will be all point between longitude 120 and 210. This encompasses much Australia and east Asia, and corresponds roughly to a 75/25 train/test split. 
+For evaluation, we split the globe into training and testing regions. All patches between longitudes 120° and 210° (covering much of Australia and East Asia) form the test set, giving roughly a 75/25 split.
 
-After having done the classification, we'll also be able to visualise the points on the map where the regression was wrong. 
+After classification, we can also map the errors back onto the globe to see where the regression fails, highlighting regions where the encoder's representation of land–sea differences is less distinct.
 
 ```python
 test_lon_min = 120.0
@@ -135,9 +132,9 @@ reg_res = run_logistic_regression(train_split_dict)
 
 ```
 
-From when I ran it, the accuracy was **99.87%**. An extremely positive result, indicating that encoder has learnt the land-sea distinction. However, don't forget that this is only one sample, and remains a fairly simple classification task. 
+Running the regression gives an accuracy of **99.87%**, a clear indication that the encoder has internalised the land–sea distinction. Still, this result comes from a single run and a relatively simple task, so it should be interpreted cautiously.
 
-We can further explore the results of the regression by inspecting its errors. 
+To dig deeper, we can examine the misclassified patches to see where the model struggles to maintain this separation.
 
 ```python
 # Get the locations of the errors
@@ -159,7 +156,9 @@ plot_dots_on_map(
   <figcaption class="figcaption-2">Fig. 2: Visualising where the locations of the logistic regression errors.</figcaption>
 </figure>
 
-Here we can see that most of the errors correspond to coastlines, whether the distinction between sea and land is less sharp. The fact that the errors correspond to coastlines is actually reassuring as even a certain level of uncertainty has been encoded.
+Most errors occur along coastlines, where the land–sea distinction is inherently less clear. This is an encouraging result: the encoder not only separates land from ocean but also reflects the natural uncertainty present at boundaries.
+
+
 
 
 
