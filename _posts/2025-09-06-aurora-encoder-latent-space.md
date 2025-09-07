@@ -190,7 +190,7 @@ To do this, we will focus on the 2 metre temperature variable, which also comes 
 
 Our focus will be on the 2-metre temperature variable, which is part of the surface variable set. For this analysis, an extreme value is defined as one exceeding a specified percentile threshold. Percentiles are sourced from ECMWF’s [Temperature statistics for Europe derived from climate projections dataset](https://cds.climate.copernicus.eu/datasets/sis-temperature-statistics?tab=overview). which provides 30-year percentile estimates for 2-metre temperature across the European region. We specifically use the maximum percentile values.
 
-Since this dataset is restricted to Europe, our analysis will also be limited to this region.
+Since this dataset is restricted to Europe, our analysis will also be limited to this region. We are also obtaining values for the 75th, 90th, 95th and 99th percentiles.
 
 The dataset can be accessed programmatically with the CDS API (a CDS account is required). Below is a short example of how to download the data:
 
@@ -255,9 +255,9 @@ is_valid_percentile = ~np.isnan(patch_level_percentiles["p99"])
 
 ```
 
-Now that we have the percentiles data for various percentiles, we need to obtain the actual data that will embded using the encoder. Obviously we want time periods that might actually surpass the percentiles, which can be done by selecting dates during heatwaves.
+With the percentile data in place, the next step is to obtain the actual temperature fields to embed with the encoder. To ensure that values exceed the chosen percentile thresholds, we select periods corresponding to heatwave events.
 
-Having selected the dates, we can extract them from the ERA5 dataset and then encode them. We stack all of the dates together to form a dataset of 10 samples.
+After identifying the relevant dates, we extract the corresponding fields from the ERA5 dataset and pass them through the encoder. The selected samples are then stacked together, resulting in a dataset of 10 encoded instances.
 
 ```python
 heatwave_dates = [
@@ -286,7 +286,9 @@ for heatwave_date in heatwave_dates:
 X = np.stack(X).transpose(1, 0, 2).reshape(512, -1)
 
 ```
-We can then construct the binary labels. For a given percentile, we defined a mask that equals one if the ERA5 temperature value exceeds the percentile for that particular longitude/latitude locaiton. We do this for all the percentiles. 
+Next, we construct the binary labels. For each percentile, we define a mask that assigns a value of 1 whenever the ERA5 temperature at a given longitude–latitude location exceeds the corresponding percentile threshold, and 0 otherwise. This process is repeated for all percentiles under consideration.
+
+Since we have 4 different percentiles (75th, 90th, 95th, and 99th), we obtain 4 different arrays. Each of which can be used as the y-labels in separate logistic regressions. 
 
 ```python
 # Construct regression labels
@@ -305,11 +307,12 @@ for p, patch_level_percentile in patch_level_percentiles.items():
 
 ```
 ### PCA (Extreme Temperatures)
-Next, we can perform the PCA on two components. Note, there is only one input dataset, as the encoding of all the heatwaves are the same. What is different are the percentile labels. We will run a logistic regression on each of the percentiles separately; however, for the PCA, we wll construct a multi label array, and since the percentiles overlap (a temperature value greater than the 99th percentile will obviously be greater than the 95th and all the others).
+We then apply PCA with two components. Here, there is only a single input dataset, since the encoder representations of the heatwave events are fixed. What changes across experiments are the percentile-based labels.
 
-The multi label array will allow us to see how the...
+For classification, we run a separate logistic regression for each percentile. For the PCA visualisation, however, we construct a multi-label array. Because percentiles are nested (e.g., values above the 99th percentile are by definition also above the 95th and lower percentiles), this approach captures the hierarchical structure of the labels.
 
-The PCA plot is shown below.
+This setup enables us to examine not only whether PCA reveals structure for a given percentile, but also whether progressive changes in structure emerge as the percentile threshold increases.
+
 <figure>
   <img src="/assets/aurora_encoder_pca_ev.png" alt="Graph" width="300" height="300" class="center-image">
   <figcaption class="figcaption-2">Fig. 4: Percentile PCA visualuation of surface embedding</figcaption>
@@ -340,16 +343,17 @@ for p, y in is_extreme_all_p.items():
         "y_test": y_test,
     }
     percentile_splits[p] = train_test_split_dict
-
     percentile_regs[p] = run_logistic_regression(train_test_split_dict)
 
 ```
 
-It's important to note that the labels are unevenly distributed in the dataset. For example, in the 99th percentile labels, only 2.8% of the labels correspond to an extreme event. Because of this, it's important to not only look at the accuracy of model, but also the precision and the recall. 
+It is important to note that the labels are highly imbalanced. For instance, at the 99th percentile, only about 2.8% of samples correspond to an extreme event. In such cases, relying on accuracy alone can be misleading, so we also evaluate precision and recall.
 
-Intuitively, precision tells us how trustworthy the model is when it identifies an extreme event. High precision implies that it says something is extreme, its very likely to be extreme. On the other hand, recal tells us how many extreme events its missing. A high recall implies that most of the extreme events are being captured by the model. 
+- **Precision** measures how reliable the model is when it flags an extreme event. High precision means that when the model predicts “extreme,” it is very likely correct.
 
-We can consider the below table showing the various accuracies, precisions, and recalls for each of the percentiles. 
+- **Recall** measures how many extreme events the model successfully captures. High recall means the model misses very few true extreme events.
+
+The table below summarises accuracy, precision, and recall across different percentiles: 
 
 | Percentile | Accuracy | Precision | Recall  |
 |------------|----------|-----------|---------|
@@ -364,7 +368,12 @@ However, as we move into the tail of the distribution, particularly beyond the 9
 
 Given the imbalance in the dataset, with far fewer examples at the upper percentiles, this behavior is expected, but it also underscores a critical limitation—while the model avoids overestimating extremes, it underestimates their true frequency.
 
+## Conclusion
+Our exploration shows that the encoder captures meaningful structure in the latent space, both in terms of geography and extremes. The PCA and regression analysis confirm that the encoder has learned to distinguish land from ocean, achieving nearly perfect accuracy, with most errors concentrated along coastlines where the boundary is naturally ambiguous. This indicates that the model reflects not only clear-cut distinctions but also the inherent uncertainty of physical boundaries.
 
+Extending this approach to extreme temperature events, we see that the nested percentile labels reveal how the encoder represents increasing levels of extremity. Precision and recall metrics highlight the trade-offs between correctly identifying rare extremes and missing them, underscoring the need to look beyond accuracy when dealing with imbalanced datasets.
+
+Together, these results suggest that the encoder is learning representations aligned with real-world structure while also exposing where limitations remain. Such insights are valuable for assessing the robustness of learned climate representations and for guiding further model development.
 
 
 
