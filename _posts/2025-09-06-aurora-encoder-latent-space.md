@@ -119,7 +119,7 @@ plt.show()
 The output is shown below. 
 
 <figure>
-  <img src="/assets/aurora_encoder_pca.png" alt="Graph" width="300" height="300" class="center-image">
+  <img src="/assets/aurora_encoder_pca.png" alt="Graph" width="550" height="400" class="center-image">
   <figcaption class="figcaption-2">Fig. 1: PCA visualuation of surface embedding</figcaption>
 </figure>
 
