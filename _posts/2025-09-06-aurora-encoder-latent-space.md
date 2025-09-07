@@ -5,6 +5,8 @@ In this post, we'll take a closer look inside the latent space of the model's en
 
 Specifically, this analysis will focus on whether the latent space encodes a clear separation between land and ocean. If such a distinction emerges, it would suggest that the encoder is capturing meaningful features tied to the geography of the input fields, an encouraging sign that the model is developing representations aligned with real-world structure. If not, it may point to limitations in the encoder's ability to disentangle different components of the input space.
 
+The full code for this post can be found [here](https://colab.research.google.com/drive/1xMmFXqavXIJUOH6rSgXbcpzuWsmY1mHg?usp=sharing).
+
 ## What is the Latent Space?
 The latent space is a compressed, numerical representation (often a high-dimensional vector) produced by the encoder from raw inputs such as global temperature fields, wind patterns, or precipitation maps. It acts as a bottleneck layer where the model distills the most important spatial and statistical features of the atmosphere and surface conditions into a compact form.
 
@@ -12,8 +14,10 @@ Exploring this space helps reveal how the model internally organises weather inf
 
 ## The Encoder Ouput
 The encoder's output is a matrix of size $512\times 259,200$. To interpret it, it will be fruitful to understand how it was constructed. 
+
+Surface and atomspheric variables are passed separately to the Aurora encoder, and are treated independently before being combined in the output.
  
-Surface and static inputs are combined into a tensor of size $2\times 7 \times720\times 1440$ (two time steps, seven variables, global grid). With a patch size of 4 and embedding dimension of 512, the surface encoder produces $512\times 180\times 360$, which is then flattened to $512\times 64800\times 1$.
+Surface and static inputs are first combined into a tensor of size $2\times 7 \times720\times 1440$ (two time steps, seven variables, global grid). With a patch size of 4 and embedding dimension of 512, the surface encoder produces $512\times 180\times 360$, which is then flattened to $512\times 64800\times 1$.
 
 Atmospheric inputs start as $2\times 5\times 13\times 720\times 1440$ (two time steps, five variables, 13 pressure levels). Using the same patching scheme, this becomes $512\times 64800\times 3$. 
 
@@ -21,36 +25,31 @@ Stacking surface and atmospheric embeddings yields $512\times 64800 \times4$, wh
 
 This structure is important because later we'll want to map vectors back to their original patches—for example, to test whether the latent space separates land from ocean or different atmospheric regimes.
 
+The first thing we will want to do is to set up the Aurora model and get access to the ERA5 data, which we will pass to the encoder to obtain the embedding. It will also be helpful later on to calculate the centre latitude/longitude position of each patch.
+
 To generate these embeddings, we pass the input fields directly through Aurora's encoder. 
 
 ```python
+import numpy as np
+import xarray as xr
+import torch
 
+# Load model
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 aurora_model = get_aurora_model(device)
 
-aurora_static = AuroraStatic(drive_path)
-batch = get_aurora_data(ic, aurora_static)
+# Set data paths and read data
+drive_path = "drive//MyDrive//Weather Models"
+static = temp = xr.open_dataset(f"{drive_path}//aurora/static.nc")
 
-# Before passing to the encoder, we need to process the input data
-# according to their code
-p = next(aurora_model.parameters())
-transformed_batch = batch.type(p.dtype)
-transformed_batch = transformed_batch.normalise(surf_stats=aurora_model.surf_stats)
-transformed_batch = transformed_batch.crop(patch_size=aurora_model.patch_size)
-transformed_batch = transformed_batch.to(p.device)
+era5_path = "https://storage.googleapis.com/weatherbench2/datasets/era5/"
+era5_file = f"{era5_path}1959-2023_01_10-wb13-6h-1440x721_with_derived_variables.zarr"
 
-B, T = next(iter(transformed_batch.surf_vars.values())).shape[:2]
-transformed_batch = dataclasses.replace(
-    transformed_batch,
-    static_vars={k: v[None, None].repeat(B, T, 1, 1) for k, v in transformed_batch.static_vars.items()},
-)
+era5_ds = xr.open_zarr(era5_file)
 
-# Get the embedding, shape (1, 259200, 512)
-full_embedding = aurora_model.encoder(transformed_batch, aurora_model.timestep)
-
-# Deconstruct into surface and atmospheric embeddings
-reshaped_embedding = res.reshape(1, 4, 64800, 512).squeeze()
-surf_embedding = reshaped_res[0].transpose(1, 0)
-atmos_embedding = reshaped_res[1:]
+# Patch and lon/lat variables
+patch_size = 4
+patch_center_lat, patch_center_lon = reduce_lon_lat(patch_size, era5_ds.latitude.values[:-1], era5_ds.longitude.values)
 
 ```
 
@@ -62,35 +61,28 @@ Our analysis uses two approaches: principal component analysis (PCA) for visuali
 
 To prepare the labels, we start from Aurora's static land–sea mask and downsample it by the patch size. A patch is classified as land if more than 50% of its area is land, otherwise it's ocean. This gives us patch-level labels aligned with the encoder's embeddings.
 
+In our analysis for ocean and land, we will only be focusing on one sample, chosen randomly.
+
 ```python
-import numpy as np
-import xarray as xr
-
-def reduce_mask(land_sea_mask: np.ndarray, patch_size: int) -> np.ndarray:
-    n_lat_patches = land_sea_mask.shape[0] // patch_size
-    n_lon_patches = land_sea_mask.shape[1] // patch_size
-    land_sea_mask_patched = np.zeros((n_lat_patches, n_lon_patches), dtype=np.int8)
-    for i in range(n_lat_patches):
-        for j in range(n_lon_patches):
-            lat_slice = slice(i * patch_size, (i+1) * patch_size)
-            lon_slice = slice(j * patch_size, (j+1) * patch_size)
-            patch_data = land_sea_mask[lat_slice, lon_slice]
-            
-            mean_val = np.mean(patch_data)
-            if mean_val >= 0.5:
-                land_sea_mask_patched[i, j] = 1
-            else:
-                land_sea_mask_patched[i, j] = 0
-
-    return land_sea_mask_patched
-
-
-static = xr.open_dataset("static.nc")
-
-patch_size = 4
-
+# Get land-sea mask and reduce to patches
 land_sea_mask = static["lsm"].values[:, :720, :,].squeeze()
 land_sea_mask_patched = reduce_mask(land_sea_mask, patch_size)
+
+# Set sample to analyse embedding
+land_sea_sample_date = "2022-08-07T06:00"
+
+ic_start = np.datetime64(land_sea_sample_date)
+ic_end = np.datetime64(ic_start) + np.timedelta64(1, "6h")
+ic = era5_ds.sel(time=slice(ic_start, ic_end))
+
+land_sea_batch = get_aurora_data(ic, static)
+
+# Run encoder
+full_embedding = run_encoder(aurora_model, land_sea_batch)
+
+# Reconstruct surface/atmos embeddings
+reshaped_embedding = full_embedding.reshape(1, 4, 64800, 512).squeeze()
+surf_embedding = reshaped_embedding[0].transpose(1, 0)
 
 ```
 
@@ -140,31 +132,6 @@ After classification, we can also map the errors back onto the globe to see wher
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 
-def get_train_test_split(
-        test_lon_min: float,
-        test_lon_max: float,
-        patch_center_lon: np.ndarray,
-        y: np.ndarray,
-        embedding: np.ndarray,
-    ) -> None:
-    is_test_region = (patch_center_lon >= test_lon_min) & (patch_center_lon <= test_lon_max)
-
-    is_training_region = ~is_test_region 
-
-    X_train = embedding[:, is_training_region].T
-    y_train = y[is_training_region]
-
-    X_test = surf_embedding[:, is_test_region].T
-    y_test = y[is_test_region]  
-
-    return {
-        "X_train": X_train,
-        "y_train": y_train,
-        "X_test": X_test,
-        "y_test": y_test,
-        "is_test_region": is_test_region,
-    }
-
 def run_logistic_regression(train_split_dict: dict) -> dict:
     clf = LogisticRegression(max_iter=1000)
     clf.fit(train_split_dict["X_train"], train_split_dict["y_train"])
@@ -210,25 +177,24 @@ plot_dots_on_map(
 ```
 
 <figure>
-  <img src="/assets/aurora_log_reg_errors.png" alt="Graph" width="300" height="300" class="center-image">
-  <figcaption class="figcaption-2">Fig. 2: Visualising where the locations of the logistic regression errors.</figcaption>
+  <img src="/assets/aurora_log_reg_errors.png" alt="Graph" width="400" height="600" class="center-image">
+  <figcaption class="figcaption-2">Fig. 2: Visualising locations of the logistic regression errors.</figcaption>
 </figure>
 
-Most errors occur along coastlines, where the land–sea distinction is inherently less clear. This is an encouraging result: the encoder not only separates land from ocean but also reflects the natural uncertainty present at boundaries.
+Most errors occur along coastlines, where the land–sea distinction is inherently less clear. This is an encouraging result, as the encoder not only separates land from ocean but also reflects the natural uncertainty present at boundaries.
 
 ## Extreme Temperature
-Now we are going to look at how the encoder has learnt representations of extreme values using the same approach (PCA and logistic regression). 
+We now turn to how the encoder captures representations of extreme values, using the same methodology as before (PCA combined with logistic regression).
 
 To do this, we will focus on the 2 metre temperature variable, which also comes from the surface variables.
 
-In addition, we will define an extreme value as one that is greated than a given percentile. We can pull percentiles from ECMWF's [Temperature statistics for Europe derived from climate projections dataset](https://cds.climate.copernicus.eu/datasets/sis-temperature-statistics?tab=overview). This dataset provides 30 year percentiles values over the European region for 2 metre temperature. We'll be interested in the maximum percentiles.
+Our focus will be on the 2-metre temperature variable, which is part of the surface variable set. For this analysis, an extreme value is defined as one exceeding a specified percentile threshold. Percentiles are sourced from ECMWF’s [Temperature statistics for Europe derived from climate projections dataset](https://cds.climate.copernicus.eu/datasets/sis-temperature-statistics?tab=overview). which provides 30-year percentile estimates for 2-metre temperature across the European region. We specifically use the maximum percentile values.
 
-Because the percentiles are limited to the European region, we will be restricting the analysis to this region. 
+Since this dataset is restricted to Europe, our analysis will also be limited to this region.
 
-We can download the dataset using the code below (you'll need a CDS account to do so).
+The dataset can be accessed programmatically with the CDS API (a CDS account is required). Below is a short example of how to download the data:
 
 ```python
-
 dataset = "sis-temperature-statistics"
 request = {
     "variable": "maximum_temperature",
@@ -264,9 +230,20 @@ percentile_data = {
 
 ```
 
-One of the first we need to do with the percentile arrays is to convert them to a resolution that matches the patch embedding, which we can do using the patch centres calculated earlier. And since the percentiles only cover the European land region, it will be useful to calculate a mask with the same shape as the patch embedding, $180\times 360$, that provides locations of valid percentile points. 
+<figure>
+  <img src="/assets/europe_99_percentiles.png" alt="Graph" width="300" height="300" class="center-image">
+  <figcaption class="figcaption-2">Figure: 3 European max 2-metre temperature 99th percentiles</figcaption>
+</figure>
+
+One of the first steps with the percentile arrays is to resample them to match the resolution of the patch embeddings, using the patch centres calculated earlier.
+
+Since the percentile data only covers the European land region, it is also useful to construct a mask aligned with the patch embedding grid ($180 \times 360$). This mask identifies the locations where valid percentile values are available.
 
 ```python
+# Lat/lon boudns
+patch_lat_bounds = np.stack([patch_center_lat - 0.5, patch_center_lat + 0.5], axis=-1)
+patch_lon_bounds = np.stack([patch_center_lon - 0.5, patch_center_lon + 0.5], axis=-1)
+
 # Reduce the percentiles into the patches
 patch_level_percentiles = {
     p: reduce_percentiles(p_data, patch_lat_bounds, patch_lon_bounds)
@@ -335,7 +312,7 @@ The multi label array will allow us to see how the...
 The PCA plot is shown below.
 <figure>
   <img src="/assets/aurora_encoder_pca_ev.png" alt="Graph" width="300" height="300" class="center-image">
-  <figcaption class="figcaption-2">Fig. 3: Percentile PCA visualuation of surface embedding</figcaption>
+  <figcaption class="figcaption-2">Fig. 4: Percentile PCA visualuation of surface embedding</figcaption>
 </figure>
 
 This PCA plot highlights how latent representations capture the progression from moderate to extreme values in a structured way. While lower percentile cases scatter broadly across the space, the more extreme percentiles gradually converge toward a distinct cluster in the upper left region of the plot.
