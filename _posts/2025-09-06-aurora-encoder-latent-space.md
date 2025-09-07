@@ -188,7 +188,7 @@ We now turn to how the encoder captures representations of extreme values, using
 
 To do this, we will focus on the 2 metre temperature variable, which also comes from the surface variables.
 
-Our focus will be on the 2-metre temperature variable, which is part of the surface variable set. For this analysis, an extreme value is defined as one exceeding a specified percentile threshold. Percentiles are sourced from ECMWF’s [Temperature statistics for Europe derived from climate projections dataset](https://cds.climate.copernicus.eu/datasets/sis-temperature-statistics?tab=overview). which provides 30-year percentile estimates for 2-metre temperature across the European region. We specifically use the maximum percentile values.
+Our focus will be on the 2-metre temperature variable, which is part of the surface variable set. For this analysis, an extreme value is defined as one exceeding a specified percentile threshold. Percentiles are sourced from ECMWF’s [Temperature statistics for Europe derived from climate projections dataset](https://cds.climate.copernicus.eu/datasets/sis-temperature-statistics?tab=overview), which provides 30-year percentile estimates for 2-metre temperature across the European region. We specifically use the maximum percentile values.
 
 Since this dataset is restricted to Europe, our analysis will also be limited to this region. We are also obtaining values for the 75th, 90th, 95th and 99th percentiles.
 
@@ -231,7 +231,7 @@ percentile_data = {
 ```
 
 <figure>
-  <img src="/assets/europe_99_percentiles.png" alt="Graph" width="300" height="300" class="center-image">
+  <img src="/assets/europe_99_percentiles.png" alt="Graph" width="500" height="500" class="center-image">
   <figcaption class="figcaption-2">Figure: 3 European max 2-metre temperature 99th percentiles</figcaption>
 </figure>
 
@@ -240,7 +240,7 @@ One of the first steps with the percentile arrays is to resample them to match t
 Since the percentile data only covers the European land region, it is also useful to construct a mask aligned with the patch embedding grid ($180 \times 360$). This mask identifies the locations where valid percentile values are available.
 
 ```python
-# Lat/lon boudns
+# Lat/lon bounds
 patch_lat_bounds = np.stack([patch_center_lat - 0.5, patch_center_lat + 0.5], axis=-1)
 patch_lon_bounds = np.stack([patch_center_lon - 0.5, patch_center_lon + 0.5], axis=-1)
 
@@ -314,7 +314,7 @@ For classification, we run a separate logistic regression for each percentile. F
 This setup enables us to examine not only whether PCA reveals structure for a given percentile, but also whether progressive changes in structure emerge as the percentile threshold increases.
 
 <figure>
-  <img src="/assets/aurora_encoder_pca_ev.png" alt="Graph" width="300" height="300" class="center-image">
+  <img src="/assets/aurora_encoder_pca_ev.png" alt="Graph" width="700" height="550" class="center-image">
   <figcaption class="figcaption-2">Fig. 4: Percentile PCA visualuation of surface embedding</figcaption>
 </figure>
 
