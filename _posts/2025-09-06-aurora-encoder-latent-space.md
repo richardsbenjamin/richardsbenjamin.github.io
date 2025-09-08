@@ -186,8 +186,6 @@ Most errors occur along coastlines, where the land–sea distinction is inherent
 ## Extreme Temperature
 We now turn to how the encoder captures representations of extreme values, using the same methodology as before (PCA combined with logistic regression).
 
-To do this, we will focus on the 2 metre temperature variable, which also comes from the surface variables.
-
 Our focus will be on the 2-metre temperature variable, which is part of the surface variable set. For this analysis, an extreme value is defined as one exceeding a specified percentile threshold. Percentiles are sourced from ECMWF’s [Temperature statistics for Europe derived from climate projections dataset](https://cds.climate.copernicus.eu/datasets/sis-temperature-statistics?tab=overview), which provides 30-year percentile estimates for 2-metre temperature across the European region. We specifically use the maximum percentile values.
 
 Since this dataset is restricted to Europe, our analysis will also be limited to this region. We are also obtaining values for the 75th, 90th, 95th and 99th percentiles.
