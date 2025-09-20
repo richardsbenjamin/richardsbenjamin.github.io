@@ -30,6 +30,13 @@ A flat line is ideal. While we expect natural variability, we also expect the re
   <figcaption class="figcaption-2">Fig. 1: ...</figcaption>
 </figure>
 
+### Spatial Map of the Trend
+Another approach for...
+
+
+### Distribution Stability 
+...
+
 
 
 
