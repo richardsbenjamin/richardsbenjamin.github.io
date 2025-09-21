@@ -6,7 +6,7 @@ In this post, we will go over the model's architecture, and some initial analysi
 
 ## DLESyM Architecture
 
-The model was trained on ERA5, though outgoing longwave raditiation was include, which came from the International Satellite Cloud Climatology Project (ISCCP) dataset.
+The model was trained on ERA5, though outgoing longwave raditiation was included, which came from the International Satellite Cloud Climatology Project (ISCCP) dataset.
 
 The output variables of the model are shown in the below table:
 
