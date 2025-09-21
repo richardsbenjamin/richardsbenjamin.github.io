@@ -59,10 +59,45 @@ The first step in analysing the climate output is to calculate global averages o
 
 A flat line is ideal. While we expect natural variability, we also expect the regression line to be almost completely flat. A steep line, indicating a cooling or warming trend means the model is not stable. 
 
+To do this, it's quite simple, especially with `xarray`. We simply take the yearly average for each variable to generate a series of 100 points. Then we perform a linear regression on the output.
+
+```python
+# calc_annual_averages.py
+import xarray as xr
+from sklearn.linear_model import LinearRegression
+
+def get_annual_averages(dataset: xr.Dataset) -> xr.Dataset:
+    annual_averages = (
+        dataset.resample(step='YE')
+        .mean(dim=['step', 'face', 'height', 'width'])
+        .isel(step=slice(None, -1))
+    )
+    return annual_averages.compute()
+
+  ocean_ds = xr.open_zarr(run_args.ocean_store)
+  atmos_ds = xr.open_zarr(run_args.atmos_store)
+
+  ocean_averages = get_annual_averages(ocean_ds)
+  atmos_averages = get_annual_averages(atmos_ds)
+
+  # Run regression and get drift
+  var_name = "sst"
+  data = ocean_averages[var_name]
+  lin = LinearRegression()
+  X = data.step.values.astype("datetime64[D]").astype(float).reshape(-1, 1)
+  y = data.values
+  lin.fit(X, y)
+  regression_line = lin.predict(X)
+  drift = lin.coef_[0]
+
+```
+
 <figure>
-  <img src="/assets/asd.png" alt="Graph" width="300" height="300" class="center-image">
-  <figcaption class="figcaption-2">Fig. 1: ...</figcaption>
+  <img src="/assets/dlesym_var_drift.png" alt="Graph" width="300" height="300" class="center-image">
+  <figcaption class="figcaption-2">Fig. 3: DLESyM variable drift.</figcaption>
 </figure>
+
+Across all three panels, the model output shows considerable short-term variability, but the fitted linear trends highlight the long-term stability of the system. Taken together, these results indicate that despite the inherent noise and variability at shorter timescales, the DLESyM model maintains long-term equilibrium without significant systematic drift in these core atmospheric and oceanic variables.
 
 ### Spatial Map of the Trend
 Another approach for...
