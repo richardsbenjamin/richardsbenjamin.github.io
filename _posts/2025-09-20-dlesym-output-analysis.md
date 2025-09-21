@@ -10,7 +10,7 @@ The model was trained on ERA5, though outgoing longwave raditiation was include,
 
 The output variables of the model are shown in the below table:
 
-| Domaine | Variable                                       |
+| Model   | Variable                                      |
 |---------|-----------------------------------------------|
 | atmos   | outgoing longwave radiation (olr)             |
 | atmos   | 2m temperature (t2m0)                         |
