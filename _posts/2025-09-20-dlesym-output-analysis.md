@@ -41,7 +41,7 @@ In DLESyM, the ocean evolves more slowly than the atmosphere, so the two models 
 To couple them, the system advances in 96-hr cycles. The atmosphere is first simulated forward in 12-hr steps, generating predictions up to 96 hr. These forecasts provide averaged fields, e.g. wind speed and surface pressure, which are then used to drive the ocean model forward over the same 96-hr window.
 
 <figure>
-  <img src="/assets/dlesym_architecture.PNG" alt="Graph" width="300" height="300" class="center-image">
+  <img src="/assets/dlesym_coupling.PNG" alt="Graph" width="300" height="300" class="center-image">
   <figcaption class="figcaption-2">Fig. 2: Coupled variables between the atmosphere and ocean models (adapted from Cresswell-Clay et al. 2024)</figcaption>
 </figure>
 
@@ -99,12 +99,24 @@ def get_annual_averages(dataset: xr.Dataset) -> xr.Dataset:
 
 Across all three panels, the model output shows considerable short-term variability, but the fitted linear trends highlight the long-term stability of the system. Taken together, these results indicate that despite the inherent noise and variability at shorter timescales, the DLESyM model maintains long-term equilibrium without significant systematic drift in these core atmospheric and oceanic variables.
 
-### Spatial Map of the Trend
-Another approach for...
-
-
 ### Distribution Stability 
-...
+Another persepctive is to analyse whether the distributions of values of variables, remain consistent across the period. 
+
+In the below, we produce histograms of the first decade (2017-2027) and the last decade (2107-2117) for sea surface temperature, 2-meter air temperature, and wind speed. By comparing the historgrams directly, we can see if the distributions have changed. We also plot like histograams of ERA5 for the decade 2007-2017. While not a directly comparable period, we can still get a sense of how DLESyM matches ERA5. 
+
+<figure>
+  <img src="/assets/dlesym_var_drift.png" alt="Graph" width="300" height="300" class="center-image">
+  <figcaption class="figcaption-2">Fig. 3: DLESyM variable drift.</figcaption>
+</figure>
+
+The left panels show DLESyM distributions for the first and last decades of the simulation, while the right panels provide reference distributions from ERA5 over 2007–2017.
+
+The DLESyM SST distribution exhibits a characteristic bimodality, with a strong peak around the freezing point near 271 K and a broader concentration between 295 and 305 K. Very minor differences appear between the first and last decades. Compared to ERA5, the model’s SST distribution appears smoother, with a less pronounced spike at the freezing point and somewhat narrower tails at the upper end. ERA5 displays a very sharp peak at 271 K, reflecting the physical constraint of seawater freezing, which the model seems to represent in a more diffuse manner.
+
+Again for 2-meter temperature, the first and last decades almost overlap perfectly. However, the DLESyM simulation produces a distribution that is slightly narrower than ERA5, with fewer extreme cold events and an upper tail that extends but remains more sharply centered near 300 K. ERA5, in contrast, shows stronger multimodality, with distinct peaks corresponding to climatologically separate regimes such as polar, midlatitude, and tropical zones. DLESyM seems to smooth over these distinctions, indicating that while the mean state is captured, the heterogeneity of climate zones may be underrepresented.
+
+Wind speed distributions show the strongest agreement between model and reanalysis. Both exhibit a right-skewed pattern with most values concentrated below 10 m/s and a long tail extending to higher values. The DLESyM distributions for early and late decades are nearly indistinguishable, and the overall shape aligns closely with ERA5.
+
 
 
 
