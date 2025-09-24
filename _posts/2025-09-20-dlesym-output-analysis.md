@@ -105,8 +105,8 @@ Another persepctive is to analyse whether the distributions of values of variabl
 In the below, we produce histograms of the first decade (2017-2027) and the last decade (2107-2117) for sea surface temperature, 2-meter air temperature, and wind speed. By comparing the historgrams directly, we can see if the distributions have changed. We also plot like histograams of ERA5 for the decade 2007-2017. While not a directly comparable period, we can still get a sense of how DLESyM matches ERA5. 
 
 <figure>
-  <img src="/assets/dlesym_var_drift.png" alt="Graph" width="300" height="300" class="center-image">
-  <figcaption class="figcaption-2">Fig. 3: DLESyM variable drift.</figcaption>
+  <img src="/assets/dlesym_var_hists.png" alt="Graph" width="300" height="300" class="center-image">
+  <figcaption class="figcaption-2">Fig. 4: Comparison of DLESyM and ERA5 Decadal Distributions of Surface Climate Variables</figcaption>
 </figure>
 
 The left panels show DLESyM distributions for the first and last decades of the simulation, while the right panels provide reference distributions from ERA5 over 2007–2017.
