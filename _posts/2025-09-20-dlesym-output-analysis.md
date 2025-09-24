@@ -1,6 +1,6 @@
 # DLESyM Output Analysis
 
-Several weeks ago, a new climate AI model, [DLESyM](https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2025AV001706), was released. This model represents a major development in the use of deep learning for Earth system science, with an explicit focus on coupling the ocean and atmosphere.
+Several weeks ago, a new climate AI model, [DLESyM](https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2025AV001706){target="_blank"}, was released. This model represents a major development in the use of deep learning for Earth system science, with an explicit focus on coupling the ocean and atmosphere.
 
 In this post, I will provide an overview of the model’s architecture, and present some initial analysis of its output. The emphasis will be on two critical aspects: how well the model maintains long-term climate stability, and representation of extreme events. These are essential for assessing whether AI-based climate models can provide reliable simulations alongside traditional physics-based approaches.
 
