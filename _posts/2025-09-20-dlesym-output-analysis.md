@@ -143,7 +143,7 @@ From the computed percentiles, we can visualize the temporal and spatial structu
 First, we examine the seasonal cycle of selected percentiles at a specific Northern Hemisphere location. 
 
 <figure>
-  <img src="/assets/season_sst_percentiles.png" alt="Graph" width="800" height="700" class="center-image">
+  <img src="/assets/season_sst_percentiles.png" alt="Graph" width="800" height="600" class="center-image">
   <figcaption class="figcaption-2">Fig. 5: Seasonal Percentiles of Sea Surface Temperature</figcaption>
 </figure>
 
