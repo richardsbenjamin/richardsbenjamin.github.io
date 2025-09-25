@@ -4,6 +4,8 @@ Several weeks ago, a new climate AI model, <a href="https://agupubs.onlinelibrar
 
 In this post, I will provide an overview of the model’s architecture, and present some initial analysis of its output. The emphasis will be on two critical aspects: how well the model maintains long-term climate stability, and representation of extreme events. These are essential for assessing whether AI-based climate models can provide reliable simulations alongside traditional physics-based approaches.
 
+The full code for this post can be found on <a href="https://github.com/richardsbenjamin/dlesymanalysis" target="_blank">GitHub</a>.
+
 ## DLESyM Architecture
 DLESyM was trained primarily on ERA5 reanalysis data, with the addition of outgoing longwave radiation from the International Satellite Cloud Climatology Project (ISCCP).
 
