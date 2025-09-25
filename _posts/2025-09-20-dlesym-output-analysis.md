@@ -141,7 +141,7 @@ From there, we can visualise the percentiles from various perspectives. In the b
 First, we consider the seasonal cycle of different percentiles of sea surface temperature for a specific location in the Northern hemisphere. 
 
 <figure>
-  <img src="/assets/seasonal_sst_percentiles.png" alt="Graph" width="800" height="700" class="center-image">
+  <img src="/assets/season_sst_percentiles.png" alt="Graph" width="800" height="700" class="center-image">
   <figcaption class="figcaption-2">Fig. 5: Seasonal Percentiles of Sea Surface Temperature</figcaption>
 </figure>
 
@@ -152,7 +152,7 @@ However, note the tight spread between the percentiles. The difference between t
 The higher percentiles (particularly the 99th) display higher-frequency fluctuations superimposed on the seasonal cycle. This could reflect short-lived warming events, likely tied to transient atmospheric forcing or mesoscale ocean variability
 
 <figure>
-  <img src="/assets/spatial_sst_percentiles.png.png" alt="Graph" width="800" height="700" class="center-image">
+  <img src="/assets/spatial_sst_percentiles.png" alt="Graph" width="800" height="700" class="center-image">
   <figcaption class="figcaption-2">Fig. 6: Spatial Percentiles of Sea Surface Temperature</figcaption>
 </figure>
 
