@@ -7,6 +7,12 @@ In this post, I will provide an overview of the model’s architecture, and pres
 ## DLESyM Architecture
 DLESyM was trained primarily on ERA5 reanalysis data, with the addition of outgoing longwave radiation from the International Satellite Cloud Climatology Project (ISCCP).
 
+A key feature of DLESyM is its use of a [HEALPix](https://en.wikipedia.org/wiki/HEALPix) grid rather than a standard latitude–longitude grid. The HEALPix grid is divided into 12 faces, each with a 64×64 resolution. 
+
+This approach is advantageous for global climate modeling because, due to the curvature of the Earth, regions defined on a regular latitude–longitude grid can have unequal surface areas, particularly near the poles. The HEALPix grid provides nearly equal-area cells, improving the representation of spatial statistics and ensuring that global averages and distributions are not biased by variations in cell size.
+
+It'll imoprtant to keep this in mind at various points in the below analysis. 
+
 The model predicts a set of key atmospheric and oceanic variables, summarized in the table below:
 
 | Model   | Variable                                      |
