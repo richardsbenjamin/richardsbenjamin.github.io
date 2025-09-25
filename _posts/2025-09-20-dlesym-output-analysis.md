@@ -120,10 +120,47 @@ The left panels show DLESyM distributions for the first and last decades of the 
 
 **Wind Speed:** Distributions show the closest agreement with ERA5. Both exhibit a right-skewed pattern, with most values below 10 m/s and a long tail to higher speeds. Early and late DLESyM decades are nearly identical, and the overall distribution aligns closely with ERA5, indicating strong consistency in modeled wind statistics over time.
 
+### Percentiles
+Next, we will calculate the percentiles for each of the variables. This will allow us to...
 
+We will do this by calculating the 75th, 90th, 95th and 99th percentiles for each variable on each day of the year for each location in the HealPix grid over the whole 100 years. Again, with `xarray`, this is very easy. We can simply use the below function. 
 
+```python
+import xarray as xr
 
+PERCENTILES = [0.75, 0.90, 0.95, 0.99]
 
+def get_quantiles(dataset: xr.Dataset) -> xr.Dataset:
+    quantiles = dataset.groupby("step.dayofyear").quantile(PERCENTILES)
+    return quantiles
+
+```
+
+From there, we can visualise the percentiles from various perspectives. In the below, we visualise sea surface temperature only.
+
+First, we consider the seasonal cycle of different percentiles of sea surface temperature for a specific location in the Northern hemisphere. 
+
+<figure>
+  <img src="/assets/seasonal_sst_percentiles.png" alt="Graph" width="800" height="700" class="center-image">
+  <figcaption class="figcaption-2">Fig. 5: Seasonal Percentiles of Sea Surface Temperature</figcaption>
+</figure>
+
+All three percentiles follow a pronounced annual cycle, with minimum temperatures in winter (around days 50–80) and maximum temperatures in summer (around days 200–250). This indicates strong seasonality in SST at this location.
+
+However, note the tight spread between the percentiles. The difference between the 90th and 99th percentiles is small, on the order of 1–2 K. This suggests that even extreme values remain relatively close to the upper quantiles of the distribution, pointing to limited variability in the upper tail.
+
+The higher percentiles (particularly the 99th) display higher-frequency fluctuations superimposed on the seasonal cycle. This could reflect short-lived warming events, likely tied to transient atmospheric forcing or mesoscale ocean variability
+
+<figure>
+  <img src="/assets/spatial_sst_percentiles.png.png" alt="Graph" width="800" height="700" class="center-image">
+  <figcaption class="figcaption-2">Fig. 6: Spatial Percentiles of Sea Surface Temperature</figcaption>
+</figure>
+
+In the above figure, we consider the percentiles of SST at all spatial points on Day 180, corresponding to late June, or midsummer in the Northern Hemisphere. To obtain the above plot, we apply the commonly used [Mollweide projection](https://healpy.readthedocs.io/en/latest/generated/healpy.visufunc.mollview.html). 
+
+The color scale ranges from approximately 270.4 K to 304.9 K (about -2.75°C to 30.85°C), with cooler temperatures rendered in dark reds and blacks, and the warmest regions shown in yellow and white.
+
+A strong latitudinal pattern is evident in the map, reflecting the broader climate zones that govern global SST distributions. As expected, equatorial regions exhibit the highest SSTs, particularly within the tropical oceans, where solar insolation is most intense and seasonal variability is minimal.
 
 
 
