@@ -121,9 +121,11 @@ The left panels show DLESyM distributions for the first and last decades of the 
 **Wind Speed:** Distributions show the closest agreement with ERA5. Both exhibit a right-skewed pattern, with most values below 10 m/s and a long tail to higher speeds. Early and late DLESyM decades are nearly identical, and the overall distribution aligns closely with ERA5, indicating strong consistency in modeled wind statistics over time.
 
 ### Percentiles
-Next, we will calculate the percentiles for each of the variables. This will allow us to...
+Another approach to evaluating the stability and realism of DLESyM outputs is to examine the temporal evolution of extreme values through percentiles.
 
-We will do this by calculating the 75th, 90th, 95th and 99th percentiles for each variable on each day of the year for each location in the HealPix grid over the whole 100 years. Again, with `xarray`, this is very easy. We can simply use the below function. 
+We calculate the 75th, 90th, 95th, and 99th percentiles for each variable at each grid point on each day of the year across the entire 100-year simulation. This provides insight into both moderate and extreme conditions, highlighting how well the model represents variability and rare events over long timescales.
+
+Again, by using `xarray`, this procedure is straightforward. The function below efficiently computes these percentiles across the HealPix grid for all time steps:
 
 ```python
 import xarray as xr
@@ -136,9 +138,9 @@ def get_quantiles(dataset: xr.Dataset) -> xr.Dataset:
 
 ```
 
-From there, we can visualise the percentiles from various perspectives. In the below, we visualise sea surface temperature only.
+From the computed percentiles, we can visualize the temporal and spatial structure of extremes. In the analysis below, we focus on sea-surface temperature.
 
-First, we consider the seasonal cycle of different percentiles of sea surface temperature for a specific location in the Northern hemisphere. 
+First, we examine the seasonal cycle of selected percentiles at a specific Northern Hemisphere location. 
 
 <figure>
   <img src="/assets/season_sst_percentiles.png" alt="Graph" width="800" height="700" class="center-image">
@@ -156,12 +158,12 @@ The higher percentiles (particularly the 99th) display higher-frequency fluctuat
   <figcaption class="figcaption-2">Fig. 6: Spatial Percentiles of Sea Surface Temperature</figcaption>
 </figure>
 
-In the above figure, we consider the percentiles of SST at all spatial points on Day 180, corresponding to late June, or midsummer in the Northern Hemisphere. To obtain the above plot, we apply the commonly used [Mollweide projection](https://healpy.readthedocs.io/en/latest/generated/healpy.visufunc.mollview.html). 
+In the above figure, we consider the percentiles of SST at all spatial points on Day 180, corresponding to late June, or midsummer in the Northern Hemisphere. The visualisation uses a  [Mollweide projection](https://healpy.readthedocs.io/en/latest/generated/healpy.visufunc.mollview.html), a standard approach for global data on a HealPix grid.
 
 The color scale ranges from approximately 270.4 K to 304.9 K (about -2.75°C to 30.85°C), with cooler temperatures rendered in dark reds and blacks, and the warmest regions shown in yellow and white.
 
-A strong latitudinal pattern is evident in the map, reflecting the broader climate zones that govern global SST distributions. As expected, equatorial regions exhibit the highest SSTs, particularly within the tropical oceans, where solar insolation is most intense and seasonal variability is minimal.
+A pronounced latitudinal pattern is evident, consistent with the global climate zones that shape SST distributions. Equatorial oceans exhibit the highest SSTs, particularly in tropical regions where solar insolation is strongest and seasonal variability is minimal
 
-
+This spatial view confirms that DLESyM captures the large-scale climatological gradients of SST while preserving expected latitudinal patterns, providing confidence in the model’s representation of global oceanic structure.
 
 
