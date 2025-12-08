@@ -14,35 +14,54 @@ $R_n$ represents the proportion of Heads in $n$ flips. Since the flips are unbia
 Since each of the $2^n$ possible sequences $\mathbf{b} \in \{0, 1\}^n$ has the same probability $P(\mathbf{b}) = 2^{-n}$, the total probability $P(R_n = r)$ is simply the number of sequences that yield this ratio, multiplied by the probability of a single sequence.
 
 The condition $R_n = r$ means the sequence $\mathbf{b}$ must contain exactly $k = nr$ ones (Heads). The number of such distinct sequences is a standard problem in combinatorics, given by the binomial coefficient:
+
 $$\mathcal{N} = \binom{n}{k} = \binom{n}{nr} = \frac{n!}{(nr)!(n - nr)!}$$
+
 The total probability is then:
+
 $$P(R_n = r) = \sum_{\mathbf{b}: R_n(\mathbf{b})=r} P(\mathbf{b}) = \mathcal{N} \cdot 2^{-n}$$
-$$P(R_n = r) = \frac{1}{2^n}\frac{n!}{(rn)!(n(1-r))!} \quad \text{(Equation 1)}$$
+$$P(R_n = r) = \frac{1}{2^n}\frac{n!}{(rn)!(n(1-r))!} $$
 
 For Large Deviation Theory, we are primarily interested in the behavior of this probability as the sequence length $n$ becomes very large ($n \to \infty$). To simplify the expression for large $n$, we use Stirling's approximation for the factorials. Specifically, we use the simplified version that focuses on the dominant exponential component: $k! \approx k^k e^{-k}$.
 
 Applying this to the three factorials:
-$n! \approx n^n e^{-n}$
-$(rn)! \approx (rn)^{rn} e^{-rn}$
-$(n(1-r))! \approx (n(1-r))^{n(1-r)} e^{-n(1-r)}$
-Hence, 
+- $n! \approx n^n e^{-n}$
+- $(rn)! \approx (rn)^{rn} e^{-rn}$
+- $(n(1-r))! \approx (n(1-r))^{n(1-r)} e^{-n(1-r)}$
+  
+Hence,
+
 $$P(R_n = r) \approx \frac{1}{2^n} \cdot \frac{n^n e^{-n}}{(rn)^{rn} e^{-rn} \cdot (n(1-r))^{n(1-r)} e^{-n(1-r)}}$$
+
 Grouping the terms, the exponential factors neatly cancel:
+
 $$\frac{e^{-n}}{e^{-rn} e^{-n(1-r)}} = e^{-n - (-rn - n(1-r))} = e^0 = 1$$
+
 Which simplifies the approximation to:
+
 $$P(R_n = r) \approx \frac{1}{2^n} \cdot \frac{n^n}{(rn)^{rn} (n(1-r))^{n(1-r)}}$$
-Next, we factor out $n^n$ from the denominator term $(rn)^{rn} (n(1-r))^{n(1-r)} = n^{rn} r^{rn} \cdot n^{n(1-r)} (1-r)^{n(1-r)} = n^{rn + n(1-r)} \cdot r^{rn} (1-r)^{n(1-r)} = n^n \cdot r^{rn} (1-r)^{n(1-r)}$. The $n^n$ terms then cancel:
+
+Next, we factor out $n^n$ from the denominator term:
+
+$$\begin{aligned} (rn)^{rn} (n(1-r))^{n(1-r)} &= n^{rn} r^{rn} \cdot n^{n(1-r)} (1-r)^{n(1-r)} &= n^{rn + n(1-r)} \cdot r^{rn} (1-r)^{n(1-r)} &= n^n \cdot r^{rn} (1-r)^{n(1-r)} \end{aligned}$$.
+
+The $n^n$ terms then cancel:
+
 $$P(R_n = r) \approx \frac{1}{2^n} \cdot \frac{n^n}{n^n \cdot r^{rn} (1-r)^{n(1-r)}}$$
 $$P(R_n = r) \approx \frac{1}{2^n r^{rn} (1-r)^{n(1-r)}}$$
 
 To reveal the characteristic LDT form, we take the natural logarithm and isolate $n$ as a factor:
+
 $$\ln \left[ P(R_n = r) \right] \approx - \ln \left[ 2^n r^{rn} (1-r)^{n(1-r)} \right]$$
 $$\ln \left[ P(R_n = r) \right] \approx - \left[ n \ln 2 + rn \ln r + n(1-r) \ln (1-r) \right]$$
 $$\ln \left[ P(R_n = r) \right] \approx -n \left[ \ln 2 + r \ln r + (1-r) \ln (1-r) \right]$$
 
 Finally, exponentiating both sides yields the canonical LDT form:
+
 $$P(R_n = r) \approx e^{-nI(r)}$$
+
 where the function $I(r)$ is defined as:
+
 $$I(r) = \ln 2 + r \ln r + (1-r) \ln (1-r)$$
 
 The equation $P(R_n = r) \approx e^{-nI(r)}$ embodies the Large Deviation Principle. This result is the essence of LDT.
