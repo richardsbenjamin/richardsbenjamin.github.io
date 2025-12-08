@@ -43,7 +43,12 @@ $$P(R_n = r) \approx \frac{1}{2^n} \cdot \frac{n^n}{(rn)^{rn} (n(1-r))^{n(1-r)}}
 
 Next, we factor out $n^n$ from the denominator term:
 
-$$\begin{aligned} (rn)^{rn} (n(1-r))^{n(1-r)} &= n^{rn} r^{rn} \cdot n^{n(1-r)} (1-r)^{n(1-r)} &= n^{rn + n(1-r)} \cdot r^{rn} (1-r)^{n(1-r)} &= n^n \cdot r^{rn} (1-r)^{n(1-r)} \end{aligned}$$.
+
+$$(rn)^{rn} (n(1-r))^{n(1-r)} = n^{rn} r^{rn} \cdot n^{n(1-r)} (1-r)^{n(1-r)}$$
+
+$$\quad = n^{rn + n(1-r)} \cdot r^{rn} (1-r)^{n(1-r)}$$
+
+$$\quad = n^n \cdot r^{rn} (1-r)^{n(1-r)}$$
 
 The $n^n$ terms then cancel:
 
@@ -66,9 +71,7 @@ $$I(r) = \ln 2 + r \ln r + (1-r) \ln (1-r)$$
 
 The equation $P(R_n = r) \approx e^{-nI(r)}$ embodies the Large Deviation Principle. This result is the essence of LDT.
 
-There are a couple of things to note about this. First, the exponent’s components are the key elements governing this probability. We have $n$, the system size (the number of bits/trials/flips), and what’s called the rate function $I(r)$. 
-
-The fact that the probability is dominated by a term of the form $e^{-n \times (\text{something positive})}$ immediately signals a rapid, exponential decay in probability as the system size $n$ increases, unless (and this is important) $I(r)$ is zero.
+There are a couple of things to note about this. First, the exponent’s components are the key elements governing this probability. We have $n$, the system size (the number of bits/trials/flips), and what’s called the rate function $I(r)$. Also, the fact that the probability is dominated by a term of the form $e^{-n \times (\text{something positive})}$ immediately signals a rapid, exponential decay in probability as the system size $n$ increases, unless (and this is important) $I(r)$ is zero.
 
 The Rate Function, $I(r)$, is the engine that dictates this probability behavior, and its shape is paramount. It is positive and convex as seen in Fig. 1, and possesses a unique global minimum. For our specific example (random bits generated with equal probability, $p=1/2$), the minimum of $I(r)$ occurs precisely at $r = 1/2$. At this minimum, the value is $I(r=1/2) = 0$.
 
