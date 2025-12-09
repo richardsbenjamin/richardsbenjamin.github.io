@@ -75,16 +75,23 @@ There are a couple of things to note about this. First, the exponent’s compone
 
 The Rate Function, $I(r)$, is the engine that dictates this probability behavior, and its shape is paramount. It is positive and convex as seen in Fig. 1, and possesses a unique global minimum. For our specific example (random bits generated with equal probability, $p=1/2$), the minimum of $I(r)$ occurs precisely at $r = 1/2$. At this minimum, the value is $I(r=1/2) = 0$.
 
-So, when $r=1/2$, the exponential approximation becomes $P(R_n = 1/2) \approx e^{-n \cdot 0} = e^0 = 1$.
+<figure>
+  <img src="/assets/ldt_rate_function.png" alt="Graph" width="500" height="450" class="center-image">
+  <figcaption class="figcaption-2">Fig. 1: Theoretical versus simulated rate function for random bits example.</figcaption>
+</figure>
 
-This should be very intuitive. The proportion $r=1/2$ represents the most likely outcome, the expected average. Therefore, the probability distribution is dominated by the region around this value. While the true probability is not exactly 1, the formula effectively says that as $n$ grows, the vast majority of the probability mass is concentrated right at the average.
+Note, when $r=1/2$, the exponential approximation becomes $P(R_n = 1/2) \approx e^{-n \cdot 0} = e^0 = 1$. This should be very intuitive. The proportion $r=1/2$ represents the most likely outcome, the expected average. Therefore, the probability distribution is dominated by the region around this value. While the true probability is not exactly 1, the formula effectively says that as $n$ grows, the vast majority of the probability mass is concentrated right at the average.
 
-Another key takeaway connects the system size ($n$) to the probability of rare events ($r \neq 1/2$).
-
-Large deviations from the expected average are exponentially suppressed as the system size increases. This is the core insight of Large Deviation Theory.
+Another key takeaway connects the system size ($n$) to the probability of rare events ($r \neq 1/2$). Large deviations from the expected average are exponentially suppressed as the system size increases. This is the core insight of Large Deviation Theory.
 
 Any proportion $r$ that deviates from the average $1/2$ is considered a rare event (e.g., $r=0.9$ or $r=0.1$). For these values, we have $I(r) > 0$. When $r \neq 1/2$, the exponent contains a positive factor, $-nI(r)$. As $n$ increases (we flip the coin more times), the entire exponent $-nI(r)$ becomes increasingly negative. Consequently, the term $e^{-nI(r)}$ decreases exponentially towards zero. In contrast, for the expected event $r=1/2$, $I(r)$ remains zero, and $e^{-nI(r)}$ stays close to $1$.
 
+This is exactly what we observe in Fig. 2, which plots the theoretical PDF according to LDT for increasing n. As n increases, the density becomes increasingly narrower, and extreme events becomes exponentially unlikely. 
+
+<figure>
+  <img src="/assets/ldt_pdfs" alt="Graph" width="500" height="450" class="center-image">
+  <figcaption class="figcaption-2">Fig. 2: Theoretical PDF for increasing n.</figcaption>
+</figure>
+
 When we randomly generate bits with equal probability, it is incredibly unlikely to observe a sequence where the majority of the outcomes all favor one side (e.g., 900 heads out of 1000 flips). The mathematical approximation confirms this intuition precisely: the probability of such an extreme outcome drops to zero exponentially fast as the number of trials ($n$) increases.
 
-The fundamental insight of LDT is the formalisation of this intuitive notion: The likelihood of a random variable deviating significantly from its expected mean is governed by an exponential law involving the system size $n$ and the rate function $I(r)$.
