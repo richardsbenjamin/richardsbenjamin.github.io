@@ -89,9 +89,87 @@ Any proportion $r$ that deviates from the average $1/2$ is considered a rare eve
 This is exactly what we observe in Fig. 2, which plots the theoretical PDF according to LDT for increasing n. As n increases, the density becomes increasingly narrower, and extreme events becomes exponentially unlikely. 
 
 <figure>
-  <img src="/assets/ldt_pdfs" alt="Graph" width="500" height="450" class="center-image">
+  <img src="/assets/ldt_pdfs.png" alt="Graph" width="500" height="450" class="center-image">
   <figcaption class="figcaption-2">Fig. 2: Theoretical PDF for increasing n.</figcaption>
 </figure>
 
 When we randomly generate bits with equal probability, it is incredibly unlikely to observe a sequence where the majority of the outcomes all favor one side (e.g., 900 heads out of 1000 flips). The mathematical approximation confirms this intuition precisely: the probability of such an extreme outcome drops to zero exponentially fast as the number of trials ($n$) increases.
+
+## Theory
+
+The cornerstone of large deviation theory is the pervasive exponential approximation encountered in systems involving many random variables. This approximation forms the basis for defining the Large Deviation Principle (LDP).
+
+### Defining the Large Deviation Principle
+A basic scaling law of the form $P_n \approx e^{-nI}$, where $P_n$ is a probability, $n$ is a large parameter (often the number of variables or size of the system), and $I$ is a positive constant, is formally known as a large deviation principle. 
+
+To formalise this, let $A_n$ be a continuous random variable indexed by $n$, with a probability density function (PDF) denoted by $f_n(a)$. We say that the probability $P(A_n \in B) = \int_B f_n(a) da$ satisfies a Large Deviation Principle with rate $I_B$ if the following limit exists:
+
+$$\lim_{n \to \infty} -\frac{1}{n} \ln P(A_n \in B) = I_B$$
+
+This mathematical statement captures the meaning of the approximation $P(A_n \in B) \approx e^{-nI_B}$. It asserts that the dominant behavior of the probability is a decaying exponential in $n$.
+
+A more detailed LDP statement often focuses on the behavior of the PDF itself. We say that $A_n$ satisfies an LDP with rate function $I(a)$ if its density function behaves asymptotically as:
+$$f_n(a) \approx e^{-nI(a)}$$
+
+- **Non-trivial Rate**: The cases of interest in large deviation theory are those for which the limit $I_B$ is non-trivial, meaning $0 < I_B < \infty$.
+- **Super-Exponential Decay**: If the limit does not exist, or if the probability $P(A_n \in B)$ decays faster than any $e^{-na}$ (for $a>0$), we say the decay is super-exponential and set $I_B = \infty$.
+- **Slow Decay**: If $P(A_n \in B)$ decays slower than $e^{-na}$ (for $a>0$), the limit $I_B$ will be $0$.
+
+The practical goal of large deviation theory involves two core problems:
+- **Existence**: Establishing that an LDP exists for a given random variable $A_n$.
+- **Derivation**: Deriving the explicit mathematical expression for the associated rate function, $I(a)$.
+  
+While direct calculation of the probability distribution and use of asymptotic formulas (like Stirling's approximation) can solve these problems in some cases, a more powerful and general method is required for complex systems. This method is provided by the Gärtner-Ellis Theorem.
+
+### The Gärtner-Ellis Theorem
+The Gärtner-Ellis Theorem provides a general calculation path by connecting the LDP to a function derived from the moment-generating function.
+
+Consider a real, continuous random variable $A_n$ with PDF $f_n(a)$. We first define its Scaled Cumulant Generating Function (SCGF), $\lambda(k)$, by the following limit:
+
+$$\lambda(k) = \lim_{n \to \infty} \frac{1}{n} \ln \langle e^{nk A_n} \rangle, \quad k \in \mathbb{R}$$
+
+where $\langle e^{nk A_n} \rangle$ is the expectation value, which is defined using the PDF as:
+
+$$\langle e^{nk A_n} \rangle = \int_{\mathbb{R}} e^{nk a} f_n(a) da$$
+
+The Gärtner-Ellis Theorem states that if the SCGF, $\lambda(k)$, exists and is differentiable for all $k \in \mathbb{R}$, then $A_n$ satisfies a large deviation principle, meaning its PDF has the asymptotic behavior:
+
+$$f_n(a) \approx e^{-nI(a)},$$
+
+with the rate function $I(a)$ given by the Legendre-Fenchel Transform of $\lambda(k)$:
+
+$$I(a) = \sup_{k \in \mathbb{R}}\{ka - \lambda(k)\}$$
+
+Where, the $\sup$ (supremum) is the [supremum](https://en.wikipedia.org/wiki/Infimum_and_supremum), an extension of the maximum function.
+
+In summary, the theorem says that when the SCGF, $\lambda(k)$, is differentiable, the random variable $A_n$ obeys an LDP with a rate function $I(a)$ given by the Legendre-Fenchel transform of $\lambda(k)$.
+
+We won’t be presenting a full derivation here. Instead, we are going to gain a more intuitive understanding of why the Legendre-Fenchel transform appears by assuming the LDP holds and examining the consequences.
+
+1. **Assume LDP for the PDF**: Start by assuming the LDP approximation for the density function:
+$$f_n(a) \approx e^{-nI(a)}$$
+2. **Substitute into Expectation**: Substitute this into the expectation value integral:
+   
+$$\langle e^{nk A_n} \rangle \approx \int_{\mathbb{R}} e^{n k a} e^{-n I(a)} da = \int_{\mathbb{R}} e^{-n [I(a) - k a]} da$$
+
+3. **Apply Laplace's Approximation**: For large $n$, integrals of this form are dominated by the maximum value of the integrand's exponent. This maximum is found by locating the supremum of $(ka - I(a))$. This process is known as Laplace's Approximation (or the saddle-point approximation).
+Applying this approximation yields:
+
+$$\langle e^{nk A_n} \rangle \approx \exp \{ n \sup_{a \in \mathbb{R}} \left\\{ k a - I(a) \right\\} \}$$
+
+4. **Derive $\lambda(k)$**: Now, substitute this result back into the definition of the SCGF:
+   
+$$\lambda(k) = \lim_{n \to \infty} \frac{1}{n} \ln \langle e^{nk A_n} \rangle = \sup_{a \in \mathbb{R}} \left\\{ k a - I(a) \right\\}$$
+
+5. **Inversion via Self-Duality**: We now have $\lambda(k)$ as the Legendre-Fenchel transform of $I(a)$. The final step is to solve for $I(a)$ in terms of $\lambda(k)$. A key property of the Legendre-Fenchel transform is that it is self-inverse (or involutive) when the functions involved are appropriately differentiable and convex.
+Assuming the differentiability of $\lambda(k)$, the self-inversion gives:
+
+$$I(a) = \sup_{k \in \mathbb{R}} \left\\{ k a - \lambda(k) \right\\}$$
+
+This heuristic derivation illustrates two crucial points. First, the appearance of the Legendre-Fenchel transform is a natural consequence of applying Laplace's approximation to the moment-generating function integral. Second, the Gärtner-Ellis Theorem is fundamentally a consequence of the large deviation principle combined with Laplace's approximation, provided the convexity conditions are met.
+
+
+
+
+
 
